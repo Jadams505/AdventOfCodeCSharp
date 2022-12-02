@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,9 +16,13 @@ namespace AdventOfCode.Days
 
 		public Day()
 		{
+			var timer = new Stopwatch();
+			timer.Start();
 			ConvertData();
 			PrintSolution1();
 			PrintSolution2();
+			timer.Stop();
+			Console.WriteLine("Execution Time: " + timer.ElapsedMilliseconds + "ms");
 		}
 
 		public abstract void ConvertData();
