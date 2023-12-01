@@ -1,10 +1,13 @@
-﻿namespace AdventOfCode
+﻿using AdventOfCode.Days;
+using System.Reflection;
+
+namespace AdventOfCode
 {
 	internal class Program
 	{
 		static void Main(string[] args)
 		{
-			Console.WriteLine("Hello, World!");
+			new Day1();
 		}
 	}
 }
