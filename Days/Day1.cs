@@ -2,7 +2,7 @@
 
 namespace AdventOfCode.Days
 {
-    internal class Day1 : Day
+    internal partial class Day1 : Day
     {
         public override Regex ParseString => new(@"\w+");
 
@@ -24,19 +24,27 @@ namespace AdventOfCode.Days
 
         }
 
+        [GeneratedRegex("[1-9]")]
+        public partial Regex MatchDigitNumbers();
+
+        [GeneratedRegex("((one|two|three|four|five|six|seven|eight|nine)|([1-9]))")]
+        public partial Regex MatchDigitAll();
+
         public override long GetSolution1()
         {
             long sum = 0;
-            int num = 0;
-            
+           
             foreach(string s in Data)
             {
-                char first = s.First(x => char.IsNumber(x));
-                char second = s.Last(x => char.IsNumber(x));
-                num += (int)char.GetNumericValue(first) * 10;
-                num += (int)char.GetNumericValue(second);
+                int num = 0;
+
+                var matches = MatchDigitNumbers().Matches(s);
+                Match m1 = matches.First();
+                Match m2 = matches.Last();
+
+                num += int.Parse(m1.Value) * 10;
+                num += int.Parse(m2.Value);
                 sum += num;
-                num = 0;
             }
             
             return sum;
@@ -47,77 +55,34 @@ namespace AdventOfCode.Days
         {
             long sum = 0;
             
-            
             foreach (string s in Data)
             {
                 int num = 0;
-                int firstIndex = 9999999;
-                int lastIndex = -1;
-                int first = 0;
-                int last = 0;
-                
-                for (int i = 0; i < s.Length; ++i)
-                {
-                    for (int j = 0; j < validNumber.Length; ++j)
-                    {
-                        int index = s.IndexOf(validNumber[j]);
-                        int index2 = s.LastIndexOf(validNumber[j]);
-                        if (index2 != -1 && index2 > lastIndex)
-                        {
-                            lastIndex = index2;
-                            last = j;
-                        }
 
-                        if (index != -1 && index < firstIndex)
-                        {
-                            firstIndex = index;
-                            first = j;
-                        }
-                    }
+                var matches = MatchDigitAll().Matches(s);
+                Match m1 = matches.First();
+                Match m2 = matches.Last();
 
-                    for(int j = 0; j < validDigit.Length; ++j)
-                    {
-                        int index = s.IndexOf(validDigit[j]);
-                        int index2 = s.LastIndexOf(validDigit[j]);
-                        if (index2 != -1 && index2 > lastIndex)
-                        {
-                            lastIndex = index2;
-                            last = j;
-                        }
-
-                        if (index != -1 && index < firstIndex)
-                        {
-                            firstIndex = index;
-                            first = j;
-                        }
-                    }
-                }
-
-                num += first * 10;
-            
+                num += ParseDigit(m1.Value) * 10;
+                num += ParseDigit(m2.Value);
                 sum += num;
             }
 
             return sum;
         }
 
-        public static char[] validDigit = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-
-
-        public static string[] validNumber = new[]
+        public static int ParseDigit(string digit) => digit switch
         {
-            "zero",
-            "one",
-            "two",
-            "three",
-            "four",
-            "five",
-            "six",
-            "seven",
-            "eight",
-            "nine",
+            "one" => 1,
+            "two" => 2,
+            "three" => 3,
+            "four" => 4,
+            "five" => 5,
+            "six" => 6,
+            "seven" => 7,
+            "eight" => 8,
+            "nine" => 9,
+            _ => int.Parse(digit)
         };
-
-
     }
 }
