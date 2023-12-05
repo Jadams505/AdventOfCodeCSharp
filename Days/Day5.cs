@@ -134,31 +134,13 @@ namespace AdventOfCode.Days
             return -1;
         }
 
-        public static List<(long rangeStart, long rangeEnd)> FindInDict(List<(long, long, long)> dict, long start, long range)
-        {
-            List<(long, long)> ranges = new();
-            foreach ((long s, long d, long r) in dict)
-            {
-                long min = Math.Max(start, s);
-                long max = Math.Min(s + r - 1, start + range - 1);
-
-                if (min >= max)
-                    continue;
-
-                long lower = min - s + d;
-                long upper = max - s + d;
-
-                ranges.Add((lower, upper - lower + 1));
-            }
-
-            return ranges;
-        }
-
         public static List<(long fromStart, long fromEnd, long toStart, long toEnd)>
-            FindInDict2(List<(long s, long d, long r)> dict, long start, long range)
+            FindInDict(List<(long s, long d, long r)> dict, long start, long range)
         {
             // everything is inclusive
             List<(long fromStart, long fromEnd, long toStart, long toEnd)> ranges = new();
+
+            // Find valid ranges in dict that fit between start and start + range
             foreach ((long s, long d, long r) in dict)
             {
                 long min = Math.Max(start, s);
@@ -175,42 +157,45 @@ namespace AdventOfCode.Days
                     bool bad = true;
                 }
 
+                // seeds from min to max map to soils from lower to upper
+                // [min, max] -> [lower, upper]
                 ranges.Add((min, max, lower, upper));
             }
             long end = start + range - 1;
             if (ranges.Count >= 1)
             {
+                // sort in order of seed range and make a copy to avoid annoying issues (this was my biggest mistake)
                 ranges.Sort((a, b) => a.fromStart.CompareTo(b.fromStart));
+                List<(long fromStart, long fromEnd, long toStart, long toEnd)> sorted = new(ranges);
+
 
                 long tempStart = start;
-                long tempEnd = ranges[0].fromStart - 1;
-                long added = 0;
-                long initialCount = ranges.Count;
+                long tempEnd = sorted[0].fromStart - 1;
+                // add the range from start to the first range (if needed)
                 if (tempEnd - tempStart >= 0)
                 {
-                    ranges.Insert(0, (tempStart, tempEnd, tempStart, tempEnd));
-                    added++;
+                    ranges.Add((tempStart, tempEnd, tempStart, tempEnd));
                 }
                 
-                for (int i = (int)added; i < initialCount - 1; ++i)
+                // add ranges in between to encompass the whole seed range 
+                for (int i = 0; i < sorted.Count - 1; ++i)
                 {
-                    var curr = ranges[i];
-                    var next = ranges[i + 1];
+                    var curr = sorted[i];
+                    var next = sorted[i + 1];
                     tempStart = curr.fromEnd + 1;
                     tempEnd = next.fromStart - 1;
                     if (tempEnd - tempStart >= 0)
                     {
                         ranges.Add((tempStart, tempEnd, tempStart, tempEnd));
-                        added++;
                     }
                 }
 
-                tempStart = ranges[^1].fromEnd + 1;
+                tempStart = sorted[^1].fromEnd + 1;
                 tempEnd = end;
+                // add the range from the last range to the end (if needed)
                 if (tempEnd - tempStart >= 0)
                 {
                     ranges.Add((tempStart, tempEnd, tempStart, tempEnd));
-                    added++;
                 }
             }
 
@@ -261,22 +246,25 @@ namespace AdventOfCode.Days
                 long start = Seeds[i];
                 long range = Seeds[i + 1];
 
-                List<(long start, long end, long s, long len)> toCheck = new() { (start, start + range - 1, start, range) };
-                List<(long start, long end, long s, long len)> next = new();
+                List<(long s, long len)> toCheck = new() { (start, range) };
+                List<(long s, long len)> next = new();
                 foreach (var dict in Trail())
                 {
-                    foreach (var r in toCheck)
+                    foreach (var seedRange in toCheck)
                     {
-                        var f = FindInDict2(dict, r.s, r.len);
-                        if (f.Count == 0)
+                        var mappedRanges = FindInDict(dict, seedRange.s, seedRange.len);
+
+                        // if nothing was mapped use the same numbers as the key
+                        if (mappedRanges.Count == 0)
                         {
-                            next.Add(r);
+                            next.Add(seedRange);
                         }
                         else
                         {
-                            foreach (var entry in f)
+                            // go through each mapping and add it the list of ranges to check in the next dictionary
+                            foreach (var entry in mappedRanges)
                             {
-                                next.Add((entry.fromStart, entry.fromEnd, entry.toStart, entry.toEnd - entry.toStart + 1));
+                                next.Add((entry.toStart, entry.toEnd - entry.toStart + 1));
                             }
                         }
                     }
