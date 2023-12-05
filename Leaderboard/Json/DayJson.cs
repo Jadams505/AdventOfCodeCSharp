@@ -4,20 +4,20 @@ namespace AdventOfCode.Leaderboard.Json
 {
     internal class DayJson : IElementJson<DayJson>
     {
-        public StarJson SilverStar { get; set; }
-        public StarJson GoldStar { get; set; }
-
-        public DayJson(StarJson silverStar, StarJson goldStar)
-        {
-            SilverStar = silverStar;
-            GoldStar = goldStar;
-        }
+        public StarJson? SilverStar { get; set; } = null;
+        public StarJson? GoldStar { get; set; } = null;
 
         public static DayJson Deserialize(JsonElement json)
         {
-            return new(
-                silverStar: StarJson.Deserialize(json.GetProperty("1")), 
-                goldStar: StarJson.Deserialize(json.GetProperty("2")));
+            DayJson day = new();
+
+            if (json.TryGetProperty("1", out var silver))
+                day.SilverStar = StarJson.Deserialize(silver);
+
+            if (json.TryGetProperty("2", out var gold))
+                day.GoldStar = StarJson.Deserialize(gold);
+
+            return day;
         }
     }
 }
