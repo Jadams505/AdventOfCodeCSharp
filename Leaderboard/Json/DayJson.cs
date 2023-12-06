@@ -19,5 +19,21 @@ namespace AdventOfCode.Leaderboard.Json
 
             return day;
         }
+
+        public int CompareSilver(DayJson? other)
+        {
+            StarJson? otherSilver = other?.SilverStar;
+
+            return SilverStar?.CompareTo(otherSilver) ?? (otherSilver is null ? 0 : 1); 
+        }
+
+        public int CompareGold(DayJson? other)
+        {
+            StarJson? otherGold = other?.GoldStar;
+
+            return GoldStar?.CompareTo(otherGold) ?? (otherGold is null ? 0 : 1);
+        }
+
+        public TimeSpan? TimeBetweenStars() => GoldStar?.TimeOfCompletion() - SilverStar?.TimeOfCompletion();
     }
 }
