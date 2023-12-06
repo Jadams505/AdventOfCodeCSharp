@@ -54,9 +54,25 @@ namespace AdventOfCode.Days
                 var client = new WebClient();
                 client.Headers.Add(HttpRequestHeader.Cookie, $"session={Secret.SessionCookie}");
                 int day = int.Parse(Regex.Match(this.GetType().Name, @"\d+").Value);
-                client.DownloadFile(
+
+                try
+                {
+                    client.DownloadFile(
                     address: $"https://adventofcode.com/2023/day/{day}/input",
                     fileName: SolutionFilePath);
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        File.Delete(SolutionFilePath);
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                }
+                
             }
         }
 
