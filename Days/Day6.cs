@@ -40,14 +40,8 @@ namespace AdventOfCode.Days
             {
                 int time = Time[i];
                 int dist = Dist[i];
-                long sum = 0;
-                for(int j = 0; j < time; j++)
-                {
-                    double madeIt = Boat.Distance(j, time);
-                    if (madeIt > dist)
-                        sum++;
-                }
-                tot *= sum;
+                (long min, long max) = Boat.WinningRange(time, dist);
+                tot *= (max - min);
             }
             return tot;
         }
@@ -63,6 +57,41 @@ namespace AdventOfCode.Days
             }
             long t = long.Parse(time);
             long d = long.Parse(distance);
+            (long min, long max) = Boat.WinningRange(t, d);
+
+            return max - min;
+        }
+
+        public long GetSolution1_Old()
+        {
+            long tot = 1;
+            for (int i = 0; i < Entrys; ++i)
+            {
+                int time = Time[i];
+                int dist = Dist[i];
+                long sum = 0;
+                for (int j = 0; j < time; j++)
+                {
+                    double madeIt = Boat.Distance(j, time);
+                    if (madeIt > dist)
+                        sum++;
+                }
+                tot *= sum;
+            }
+            return tot;
+        }
+
+        public long GetSolution2_Old()
+        {
+            string time = "";
+            string distance = "";
+            for (int i = 0; i < Entrys; ++i)
+            {
+                time += Time[i];
+                distance += Dist[i];
+            }
+            long t = long.Parse(time);
+            long d = long.Parse(distance);
             long sum = 0;
             for (int j = 0; j < t; j++)
             {
@@ -70,8 +99,6 @@ namespace AdventOfCode.Days
                 if (madeIt > d)
                     sum++;
             }
-
-
             return sum;
         }
     }
@@ -81,6 +108,26 @@ namespace AdventOfCode.Days
         public static double Distance(long n, long total)
         {
             return n * (total - n);
+        }
+
+        /* Quadratic Equation:
+
+           t^2 - (total * t) + distance = 0
+        
+          -b +- sqrt(b^2 - 4ac)
+          --------------------
+                  2a
+        */
+        public static (long min, long max) WinningRange(long total, long distance)
+        {
+            double underRadical = (long)Math.Pow(total, 2) - 4 * distance;
+            double numeratorPlus = total + Math.Sqrt(underRadical);
+            double numeratorMinus = total - Math.Sqrt(underRadical);
+
+            long min = (long)(Math.Min(numeratorPlus, numeratorMinus) / 2);
+            long max = (long)(Math.Max(numeratorPlus, numeratorMinus) / 2);
+
+            return (min, max);
         }
     }
 }
