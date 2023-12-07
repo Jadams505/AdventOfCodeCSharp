@@ -5,8 +5,14 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <StartupObject>AdventOfCode.Program</StartupObject>
-    <!-- <StartupObject>AdventOfCode.Leaderboard.Runner</StartupObject> -->
+	  <!-- <StartupObject>AdventOfCode.Program</StartupObject> -->
+    <StartupObject>AdventOfCode.Leaderboard.Runner</StartupObject>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BetterConsoles.Colors" Version="1.1.1" />
+    <PackageReference Include="BetterConsoles.Core" Version="1.2.0" />
+	<PackageReference Include="BetterConsoleTables" Version="2.0.2-rc1" />
+  </ItemGroup>
     
 </Project>

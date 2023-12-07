@@ -1,11 +1,16 @@
 ﻿using AdventOfCode.Leaderboard.Json;
+using System.Drawing;
 using System.Net;
 using System.Text.Json;
+using BetterConsoles.Tables.Builders;
+using BetterConsoles.Tables.Models;
+using BetterConsoles.Tables.Configuration;
 
 namespace AdventOfCode.Leaderboard
 {
     internal record Leaderboard(string LeaderboardId, int Year)
     {
+        public const string EmptyTableEntry = "-";
         public LeaderboardJson Stats { get; private set; } = new();
         public string LeaderboardFile => $"{LeaderboardId}.json";
         public DateTime LastUpdateTimeUtc { get; private set; }
@@ -173,10 +178,50 @@ namespace AdventOfCode.Leaderboard
     {
         public static void Main(string[] args)
         {
-            Leaderboard leaderboard = new(Secret.JetLeaderboard, 2023);
+            Leaderboard leaderboard = new(Secret.DadLeaderboard, 2023);
             leaderboard.GetLeaderboardFromWeb();
             leaderboard.Parse();
-            leaderboard.DayComparison(2);
+
+            string outputFile = "Leaderboard.txt";
+
+            File.WriteAllText(outputFile, "");
+
+            for(int i = 1; i <= 6; ++i)
+            {
+                int day = i;
+
+                Console.WriteLine($"Day {day}");
+
+                var builder = new TableBuilder(TableConfig.UnicodeAlt());
+
+                builder.AddColumn("Name");
+
+                var silverCell = new CellFormat()
+                {
+                    ForegroundColor = Color.Silver,
+                };
+                builder.AddColumn("Silver");
+
+                var goldCell = new CellFormat()
+                {
+                    ForegroundColor = Color.Gold
+                };
+                builder.AddColumn("Gold");
+
+                builder.AddColumn("Delta");
+
+                var table = builder.Build();
+
+                leaderboard.Stats.SortedByDeltaDay(day);
+                foreach (var member in leaderboard.Stats.Members)
+                {
+                    member.AddDayAsRow(table, day, leaderboard.DayStart(day));
+                }
+
+                Console.WriteLine(table.ToString());
+                File.AppendAllText(outputFile, $"Day {i}\n");
+                File.AppendAllText(outputFile, table.ToString() + "\n");
+            }
         }
     }
 }

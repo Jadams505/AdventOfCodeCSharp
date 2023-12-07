@@ -25,5 +25,20 @@ namespace AdventOfCode.Leaderboard.Json
 
             return leaderboardData;
         }
+
+        public void SortedByDeltaDay(int day)
+        {
+            Members.Sort((first, second) =>
+            {
+                first.DayLookup.TryGetValue(day, out DayJson? firstDay);
+                second.DayLookup.TryGetValue(day, out DayJson? secondDay);
+
+                int delta = firstDay?.CompareDelta(secondDay) ?? (secondDay is null ? 0 : 1);
+                int silver = firstDay?.CompareSilver(secondDay) ?? (secondDay is null ? 0 : 1);
+                int gold = firstDay?.CompareGold(secondDay) ?? (secondDay is null ? 0 : 1);
+
+                return delta == 0 ? silver == 0 ? gold : silver : delta;
+            });
+        }
     }
 }

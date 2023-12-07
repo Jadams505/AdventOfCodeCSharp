@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using BetterConsoles.Tables;
+using BetterConsoles.Tables.Models;
+using System.Text.Json;
 
 namespace AdventOfCode.Leaderboard.Json
 {
@@ -28,6 +30,26 @@ namespace AdventOfCode.Leaderboard.Json
             }
 
             return member;
+        }
+
+        public void AddDayAsRow(Table table, int day, DateTime startTime)
+        {
+            if (DayLookup.TryGetValue(day, out var dayData))
+            {
+                table.AddRow(
+                    Name,
+                    dayData.SilverCompletionTimeFrom(startTime),
+                    dayData.GoldCompletionTimeFrom(startTime),
+                    dayData.GetTimeBetweenStarts());
+            }
+            else
+            {
+                table.AddRow(
+                    Name, 
+                    Leaderboard.EmptyTableEntry, 
+                    Leaderboard.EmptyTableEntry, 
+                    Leaderboard.EmptyTableEntry);
+            }
         }
     }
 }
