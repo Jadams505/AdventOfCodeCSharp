@@ -34,17 +34,14 @@ namespace AdventOfCode.Leaderboard.Json
             return TimeOfCompletion() - other.TimeOfCompletion();
         }
 
-        public string TimeToCompleteFrom(DateTime startTime)
+        public TimeSpan TimeToCompleteFrom(DateTime startTime)
         {
             var endTime = DateTimeOffset.FromUnixTimeSeconds(StarTimeStamp);
             TimeSpan deltaTime = endTime - startTime;
             if (deltaTime.Ticks < 0)
                 throw new ArgumentException("start time is less than end time");
 
-            if (deltaTime.TotalHours > 24)
-                return ">24h";
-
-            return deltaTime.ToString();
+            return deltaTime;
         }
     }
 }

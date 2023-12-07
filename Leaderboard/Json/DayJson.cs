@@ -42,33 +42,14 @@ namespace AdventOfCode.Leaderboard.Json
             return thisDelta.CompareTo(otherDelta);
         }
 
-        public string SilverCompletionTimeFrom(DateTime startTime)
+        public TimeSpan? SilverCompletionTimeFrom(DateTime startTime)
         {
-            if (SilverStar is null)
-                return Leaderboard.EmptyTableEntry;
-
-            return SilverStar.TimeToCompleteFrom(startTime);
+            return SilverStar?.TimeToCompleteFrom(startTime);
 ;       }
 
-        public string GoldCompletionTimeFrom(DateTime startTime)
+        public TimeSpan? GoldCompletionTimeFrom(DateTime startTime)
         {
-            if (GoldStar is null)
-                return Leaderboard.EmptyTableEntry;
-
-            return GoldStar.TimeToCompleteFrom(startTime);
-        }
-
-        public string GetTimeBetweenStarts()
-        {
-            TimeSpan? between = TimeBetweenStars();
-
-            if(between is null)
-                return Leaderboard.EmptyTableEntry;
-
-            if (between.Value.TotalHours > 24)
-                return ">24h";
-
-            return between.Value.ToString();
+            return GoldStar?.TimeToCompleteFrom(startTime);
         }
 
         public TimeSpan? TimeBetweenStars() => GoldStar?.TimeOfCompletion() - SilverStar?.TimeOfCompletion();
