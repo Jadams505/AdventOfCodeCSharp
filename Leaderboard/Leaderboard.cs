@@ -178,7 +178,7 @@ namespace AdventOfCode.Leaderboard
     {
         public static void Main(string[] args)
         {
-            Leaderboard leaderboard = new(Secret.DadLeaderboard, 2023);
+            Leaderboard leaderboard = new(Secret.JetLeaderboard, 2023);
             leaderboard.GetLeaderboardFromWeb();
             leaderboard.Parse();
 

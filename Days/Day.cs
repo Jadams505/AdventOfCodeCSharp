@@ -61,7 +61,7 @@ namespace AdventOfCode.Days
                     address: $"https://adventofcode.com/2023/day/{day}/input",
                     fileName: SolutionFilePath);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     try
                     {
@@ -80,6 +80,9 @@ namespace AdventOfCode.Days
         {
             FileInfo solution = new(SolutionFilePath);
             FileInfo bin = new(FilePath);
+
+            if (!solution.Exists)
+                return;
 
             if(!bin.Exists || solution.LastWriteTime.Ticks > bin.LastWriteTime.Ticks)
             {
