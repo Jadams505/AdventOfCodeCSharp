@@ -38,7 +38,7 @@ namespace AdventOfCode.Days
             A = 14,
             K = 13,
             Q = 12,
-            J = 1, // set back to 11 for part 1
+            J = 11, // set back to 11 for part 1
             T = 10,
             Two = 2,
             Three = 3,
@@ -103,11 +103,12 @@ namespace AdventOfCode.Days
 
             public void GetCardCountDict()
             {
-                for(int i = (int)Card.Two; i <= (int)Card.A; ++i)
+                var values = (Card[])Enum.GetValues(typeof(Card));
+                for (int i = 0; i < values.Length; ++i)
                 {
-                    CardCounts.Add((Card)i, 0);
+                    CardCounts.Add(values[i], 0);
                 }
-                CardCounts.Add(Card.J, 0);
+                
                 for (int i = 0; i < Cards.Length; ++i)
                 {
                     CardCounts[Cards[i]]++;
@@ -347,6 +348,28 @@ namespace AdventOfCode.Days
                 return 0;
             }
 
+            public int CompareHighestPart2(Hand other)
+            {
+                for (int i = 0; i < Cards.Length; ++i)
+                {
+                    int mine = (int)Cards[i];
+                    int yours = (int)other.Cards[i];
+
+                    if (Cards[i] == Card.J)
+                        mine = 1;
+
+                    if (other.Cards[i] == Card.J)
+                        yours = 1;
+
+                    if (mine < yours)
+                        return -1;
+                    else if (mine > yours)
+                        return 1;
+                }
+
+                return 0;
+            }
+
             public int CompareTo(Hand other)
             {
                 var me = Cards;
@@ -365,7 +388,7 @@ namespace AdventOfCode.Days
                 Rank otherR = other.IncreaseRank(out var otherIncrease);
 
                 if (mine == otherR)
-                    return CompareHighest(other);
+                    return CompareHighestPart2(other);
 
                 return mine < otherR ? -1 : 1;
             }
@@ -375,15 +398,12 @@ namespace AdventOfCode.Days
         public override long GetSolution1()
         {
             long result = 0;
-            /*
             Hands.Sort((x, y) => x.CompareTo(y));
-            //Hands.Reverse();
 
             for(int i = 0; i < Hands.Count; ++i)
             {
                 result += (i + 1) * Hands[i].Bid;
             }
-            */
             return result;
         }
 
