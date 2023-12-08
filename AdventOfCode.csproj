@@ -5,9 +5,9 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <StartupObject>AdventOfCode.Leaderboard.Runner</StartupObject>
-	  <!-- 
 	  <StartupObject>AdventOfCode.Program</StartupObject>
+	  <!-- 
+	  <StartupObject>AdventOfCode.Leaderboard.Runner</StartupObject>
 	  -->
   </PropertyGroup>
 

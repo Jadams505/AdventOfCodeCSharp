@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace AdventOfCode.Days
 {
-    internal abstract class Day
+    internal abstract partial class Day
     {
         public virtual string FilePath => $"Input/{GetType().Name.ToLower()}.txt";
         public string SolutionFilePath => $"../../../{FilePath}";
+
+        [GeneratedRegex(@"\d+")]
+        public partial Regex Number();
+
+        [GeneratedRegex(@"\w+")]
+        public partial Regex Word();
 
         public abstract Regex ParseString { get; }
 
