@@ -15,6 +15,9 @@ namespace AdventOfCode.Days
         [GeneratedRegex(@"\w+")]
         public partial Regex Word();
 
+        [GeneratedRegex(@"[a-zA-Z0-9]+")]
+        public partial Regex NumberLetter();
+
         public abstract Regex ParseString { get; }
 
         public Day()
