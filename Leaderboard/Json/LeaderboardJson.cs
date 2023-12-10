@@ -37,7 +37,7 @@ namespace AdventOfCode.Leaderboard.Json
                 int silver = firstDay?.CompareSilver(secondDay) ?? (secondDay is null ? 0 : 1);
                 int gold = firstDay?.CompareGold(secondDay) ?? (secondDay is null ? 0 : 1);
 
-                return delta == 0 ? silver == 0 ? gold : silver : delta;
+                return gold + silver == 0 ? delta : gold + silver;
             });
         }
     }

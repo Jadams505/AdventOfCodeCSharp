@@ -51,7 +51,7 @@ namespace AdventOfCode.Leaderboard
         {
             if (time is null)
                 return EmptyTableEntry;
-
+            
             if (time.Value.TotalHours > 24)
                 return Beyond24hEntry;
 
@@ -88,7 +88,7 @@ namespace AdventOfCode.Leaderboard
 
         private void AddTableForDay(int day)
         {
-            Leaderboard.Stats.SortedByDeltaDay(day);
+            Leaderboard.Stats.Members.SortByDeltaTime(day);
 
             foreach (var member in Leaderboard.Stats.Members)
             {
