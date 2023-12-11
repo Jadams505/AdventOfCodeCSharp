@@ -8,12 +8,13 @@ namespace AdventOfCode.Days
     {
         public override Regex ParseString => throw new NotImplementedException();
 
-        public Universe Universe { get; set; } = new();
+        public Universe? Universe { get; set; } = null;
 
         public override void ConvertData()
         {
             var contents = File.ReadAllLines(FilePath);
 
+            List<List<char>> data = new();
             for (int i = 0; i < contents.Length; ++i)
             {
                 var line = contents[i];
@@ -22,25 +23,21 @@ namespace AdventOfCode.Days
                 {
                     chars.Add(c);
                 }
-                Universe.Data.Add(chars);
+                data.Add(chars);
             }
 
-            Universe.PopulateGalaxies();
+            Universe = new(data);
         }
 
         public override long GetSolution1()
         {
             long result = 0;
 
-            Universe.Expanse = 2 - 1;
+            Universe!.Expanse = 2 - 1;
 
-            var pairs = Universe.GetPairs();
-            var cols = Universe.EmptyCols();
-            var rows = Universe.EmptyRows();
-
-            foreach (var pair in pairs)
+            foreach (var pair in Universe.Pairs)
             {
-                result += Universe.ShortestDistance2(pair.a, pair.b, rows, cols);
+                result += Universe.ShortestDistance(pair.a, pair.b);
             }
 
             return result;
@@ -50,15 +47,11 @@ namespace AdventOfCode.Days
         {
             long result = 0;
 
-            Universe.Expanse = 1_000_000 - 1;
+            Universe!.Expanse = 1_000_000 - 1;
 
-            var pairs = Universe.GetPairs();
-            var cols = Universe.EmptyCols();
-            var rows = Universe.EmptyRows();
-
-            foreach (var pair in pairs)
+            foreach (var pair in Universe.Pairs)
             {
-                result += Universe.ShortestDistance2(pair.a, pair.b, rows, cols);
+                result += Universe.ShortestDistance(pair.a, pair.b);
             }
             return result;
         }
@@ -69,33 +62,24 @@ namespace AdventOfCode.Days
         public List<List<char>> Data { get; set; } = new();
 
         public List<Point> Galaxies = new List<Point>();
+        public List<(Point a, Point b)> Pairs = new();
+
+        private List<int> EmptyRowIndexes = new();
+
+        private List<int> EmptyColIndexes = new();
 
         public int Expanse { get; set; }
 
-        public List<char> Empty(int size)
+        public Universe(List<List<char>> data)
         {
-            List<char> empty = new();
-            for(int i = 0; i < size; ++i)
-            {
-                empty.Add('.');
-            }
-            return empty;
+            Data = data;
+            PopulateGalaxies();
+            EmptyRowIndexes = EmptyRows();
+            EmptyColIndexes = EmptyCols();
+            Pairs = GetPairs();
         }
 
-        public Point Up(Point pos) => new (pos.X - 1, pos.Y);
-        public Point Down(Point pos) => new (pos.X + 1, pos.Y);
-        public Point Left(Point pos) => new (pos.X, pos.Y - 1);
-        public Point Right(Point pos) => new (pos.X, pos.Y + 1);
-
-        public int ShortestDistance(Point a, Point b)
-        {
-            int deltaX = b.X - a.X;
-            int deltaY = b.Y - a.Y;
-
-            return Math.Abs(deltaX) + Math.Abs(deltaY);
-        }
-
-        public long ShortestDistance2(Point a, Point b, List<int> emptyRow, List<int> emptyCol)
+        public long ShortestDistance(Point a, Point b)
         {
             int minX = Math.Min(a.X, b.X);
             int maxX = Math.Max(a.X, b.X);
@@ -104,8 +88,8 @@ namespace AdventOfCode.Days
             int deltaX = b.X - a.X;
             int deltaY = b.Y - a.Y;
 
-            int rows = emptyRow.Count(x => x > minX && x < maxX);
-            int cols = emptyCol.Count(x => x > minY && x < maxY);
+            int rows = EmptyRowIndexes.Count(x => x > minX && x < maxX);
+            int cols = EmptyColIndexes.Count(x => x > minY && x < maxY);
 
             long res = Math.Abs(deltaX) + Math.Abs(deltaY) + rows * Expanse + cols * Expanse;
 
@@ -178,57 +162,6 @@ namespace AdventOfCode.Days
                 }
             }
             return emptyCol;
-        }
-
-        public void Expand()
-        {
-            int doubleRow = Data[0].Count * 2;
-            int doubleCol = Data.Count * 2;
-            List<int> emptyRows = new();
-            for(int i = 0; i < Data.Count; ++i)
-            {
-                int index = Data.FindIndex(i, x => !x.Contains('#'));
-                if(index != -1)
-                {
-                    Data.Insert(index + 1, Empty(Data[index].Count));
-                    i = index + 1;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            List<int> emptyCol = new();
-            for(int j = 0; j < Data[0].Count; ++j)
-            {
-                bool hasGal = false;
-                for (int i = 0; i < Data.Count; ++i)
-                {
-                    var curr = Data[i][j];
-                    if(curr == '#')
-                    {
-                        hasGal = true;
-                        break;
-                    }
-                }
-                if (!hasGal)
-                {
-                    emptyCol.Add(j);
-                }
-            }
-
-            int offset = 1;
-            foreach (var entry in emptyCol)
-            {
-                for(int i = 0; i < Data.Count; ++i)
-                {
-                    Data[i].Insert(entry + offset, '.');
-                    
-                }
-                offset++;
-            }
-            
         }
     }
 }
