@@ -12,11 +12,8 @@ namespace AdventOfCode.Days
 
         public PipeMap Map { get; set; } = new();
 
-        
-
         public override void ConvertData()
         {
-
             var contents = File.ReadAllLines(FilePath);
 
             for(int i = 0; i < contents.Length; ++i)
@@ -29,27 +26,24 @@ namespace AdventOfCode.Days
                 }
                 Map.Data.Add(chars);
             }
+
+            Map.Loop();
         }
 
         public override long GetSolution1()
         {
             
             long result = 0;
-            /*
-            var loop = Map.Loop();
-            result = loop.Count / 2 + 1;
-            */
+
+            var loop = Map.LoopPoints;
+            result = loop.Count / 2;
             
             return result;
         }
 
         public override long GetSolution2()
         {
-            long result = 0;
-            
-            var spots = Map.SpotsInLoop();
-            
-           // Map.Debug();
+            var spots = Map.EnclosedPoints();
 
             return spots.Count();
         }
@@ -59,55 +53,32 @@ namespace AdventOfCode.Days
     {
         public List<List<char>> Data = new();
 
-        public static char[] Pipes = ['|', '-', 'L', 'J', '7', 'F'];
+        public List<Point> LoopPoints = new();
 
         public Point Up(Point pos) => (pos.i - 1, pos.j);
         public Point Down(Point pos) => (pos.i + 1, pos.j);
         public Point Left(Point pos) => (pos.i, pos.j - 1);
         public Point Right(Point pos) => (pos.i, pos.j + 1);
 
-        public void Debug()
+        public bool ValidPoint(Point pos)
         {
-            var loop = Loop().ToHashSet();
+            if (pos.i < 0 || pos.i >= Data.Count)
+                return false;
+            if (pos.j < 0 || pos.j >= Data[pos.i].Count)
+                return false;
 
-            for(int i = 0; i < Data.Count; ++i)
-            {
-                for(int j = 0; j < Data[i].Count; ++j)
-                {
-                    if(!loop.Contains((i, j)))
-                    {
-                        if (Data[i][j] != '.')
-                            Data[i][j] = 'X';
-                    }
-                    else
-                    {
-                        Data[i][j] = '\u25a0';
-                    }
-                }
-            }
-            File.Delete("day10-test.txt");
-            for (int i = 0; i < Data.Count; ++i)
-            {
-                var builder = new StringBuilder();
-                for (int j = 0; j < Data[i].Count; ++j)
-                {
-                    builder.Append(Data[i][j]);
-                }
-                builder.Append('\n');
-                File.AppendAllText("day10-test.txt", builder.ToString());
-            }
+            return true;
         }
 
         public bool CanLeft(Point pos)
         {
             char curr = Data[pos.i][pos.j];
             pos.j -= 1;
-            if (pos.i < 0 || pos.i >= Data.Count)
-                return false;
-            if (pos.j < 0 || pos.j >= Data[pos.i].Count)
-                return false;
-            char next = Data[pos.i][pos.j];
 
+            if (!ValidPoint(pos))
+                return false;
+
+            char next = Data[pos.i][pos.j];
             return curr switch
             {
                 '-' or 'J' or '7' => next == '-' || next == 'L' || next == 'F',
@@ -119,12 +90,11 @@ namespace AdventOfCode.Days
         {
             char curr = Data[pos.i][pos.j];
             pos.j += 1;
-            if (pos.i < 0 || pos.i >= Data.Count)
-                return false;
-            if (pos.j < 0 || pos.j >= Data[pos.i].Count)
-                return false;
-            char next = Data[pos.i][pos.j];
 
+            if (!ValidPoint(pos))
+                return false;
+
+            char next = Data[pos.i][pos.j];
             return curr switch
             {
                 '-' or 'L' or 'F' => next == '-' || next == 'J' || next == '7',
@@ -136,12 +106,11 @@ namespace AdventOfCode.Days
         {
             char curr = Data[pos.i][pos.j];
             pos.i -= 1;
-            if (pos.i < 0 || pos.i >= Data.Count)
-                return false;
-            if (pos.j < 0 || pos.j >= Data[pos.i].Count)
-                return false;
-            char next = Data[pos.i][pos.j];
 
+            if (!ValidPoint(pos))
+                return false;
+
+            char next = Data[pos.i][pos.j];
             return curr switch
             {
                 '|' or 'L' or 'J' => next == '|' || next == '7' || next == 'F',
@@ -153,12 +122,11 @@ namespace AdventOfCode.Days
         {
             char curr = Data[pos.i][pos.j];
             pos.i += 1;
-            if (pos.i < 0 || pos.i >= Data.Count)
-                return false;
-            if (pos.j < 0 || pos.j >= Data[pos.i].Count)
-                return false;
-            char next = Data[pos.i][pos.j];
 
+            if (!ValidPoint(pos))
+                return false;
+
+            char next = Data[pos.i][pos.j];
             return curr switch
             {
                 '|' or '7' or 'F' => next == '|' || next == 'L' || next == 'J',
@@ -168,25 +136,26 @@ namespace AdventOfCode.Days
 
         public bool Travel(Point last, Point curr, out Point next)
         {
-            if(CanLeft(curr) && last.j - curr.j != -1)
+            // if you can go left and you didn't come from the left then move left
+            if(CanLeft(curr) && last != Left(curr))
             {
                 next = (curr.i, curr.j - 1);
                 return true;
             }
 
-            if(CanRight(curr) && last.j - curr.j != 1)
+            if(CanRight(curr) && last != Right(curr))
             {
                 next = (curr.i, curr.j + 1);
                 return true;
             }
 
-            if(CanUp(curr) && last.i - curr.i != -1)
+            if(CanUp(curr) && last != Up(curr))
             {
                 next = (curr.i - 1, curr.j);
                 return true;
             }
 
-            if(CanDown(curr) && last.i - curr.i != 1)
+            if(CanDown(curr) && last != Down(curr))
             {
                 next = (curr.i + 1, curr.j);
                 return true;
@@ -224,22 +193,23 @@ namespace AdventOfCode.Days
         public void Set(Point p, char c) => Data[p.i][p.j] = c;
         public char Get(Point p) => Data[p.i][p.j];
 
-        public List<Point> Loop()
+        public void Loop()
         {
+            if (LoopPoints.Count > 0)
+                return;
+
             List<Point> path = new();
             Point s = FindS();
-            Point up = Up(s);
-            Point down = Down(s);
-            Point left = Left(s);
-            Point right = Right(s);
 
+            // Try various values for s and see if they work
             Set(s, '|');
             if (CanUp(s) && CanDown(s))
             {
                 Set(s, 'S');
                 path = CreatePath(s, Up(s));
                 Set(s, '|');
-                return path;
+                LoopPoints = path;
+                return;
             }
 
             Set(s, '-');
@@ -248,7 +218,8 @@ namespace AdventOfCode.Days
                 Set(s, 'S');
                 path = CreatePath(s, Left(s));
                 Set(s, '-');
-                return path;
+                LoopPoints = path;
+                return;
             }
 
             Set(s, 'L');
@@ -257,7 +228,8 @@ namespace AdventOfCode.Days
                 Set(s, 'S');
                 path = CreatePath(s, Right(s));
                 Set(s, 'L');
-                return path;
+                LoopPoints = path;
+                return;
             }
 
             Set(s, 'J');
@@ -266,7 +238,8 @@ namespace AdventOfCode.Days
                 Set(s, 'S');
                 path = CreatePath(s, Left(s));
                 Set(s, 'J');
-                return path;
+                LoopPoints = path;
+                return;
             }
 
             Set(s, '7');
@@ -275,7 +248,8 @@ namespace AdventOfCode.Days
                 Set(s, 'S');
                 path = CreatePath(s, Left(s));
                 Set(s, '7');
-                return path;
+                LoopPoints = path;
+                return;
             }
 
             Set(s, 'F');
@@ -284,53 +258,55 @@ namespace AdventOfCode.Days
                 Set(s, 'S');
                 path = CreatePath(s, Right(s));
                 Set(s, 'F');
-                return path;
+                LoopPoints = path;
+                return;
             }
-
-            return path;
         }
 
-        public List<Point> SpotsInLoop()
+        public List<Point> EnclosedPoints()
         {
-            var spots = new List<Point>();
-            var loop = Loop().ToHashSet();
+            var loop = LoopPoints.ToHashSet();
 
+            // Shorten the range to only those points in the loop 
             var top = loop.Min(x => x.i);
             var bottom = loop.Max(x => x.i);
             var left = loop.Min(x => x.j);
             var right = loop.Max(x => x.j);
 
-            HashSet<Point> found = new();
+            List<Point> found = new();
 
             for(int i = top; i <= bottom; ++i)
             {
                 char last = '-';
                 bool isIn = false;
-                int count = 0;
+                // left - 1 guarentees that isIn is false
                 for(int j = left - 1; j <= right; ++j)
                 {
+                    // hack to bypass left - 1
                     if (j < 0) continue;
-                    char curr = Get((i, j));
 
+                    char curr = Get((i, j));
+                    // if the current point in the line is in the loop
                     if(loop.Contains((i, j)))
                     {
+                        // skip '-' since the don't effect what is in or out
                         if (curr == '-') continue;
 
+                        // these combinations switch from in and out state
                         if (last == 'L' && curr == '7' ||
-                        last == 'F' && curr == 'J' ||
-                        curr == '|')
+                            last == 'F' && curr == 'J' ||
+                            curr == '|')
                         {
                             isIn = !isIn;
                         }
-                    }
 
-                    if (!loop.Contains((i, j)) && isIn)
+                        last = curr;
+                    }
+                    else if (isIn)
                     {
+                        // if the points is not part of the loop and it is enclosed by the loop add it to the list
                         found.Add((i, j));
                     }
-
-                    if(loop.Contains((i, j)))
-                        last = curr;
                 }
             }
 
