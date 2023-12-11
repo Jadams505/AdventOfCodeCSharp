@@ -49,7 +49,7 @@ namespace AdventOfCode.Days
             
             var spots = Map.SpotsInLoop();
             
-            Map.Debug();
+           // Map.Debug();
 
             return spots.Count();
         }
@@ -210,7 +210,7 @@ namespace AdventOfCode.Days
 
         public List<Point> CreatePath(Point curr, Point next)
         {
-            List<Point> path = [next];
+            List<Point> path = [curr, next];
             Point tempNext = next;
             while (Travel(curr, next, out var outNext))
             {
@@ -237,45 +237,57 @@ namespace AdventOfCode.Days
             if (CanUp(s) && CanDown(s))
             {
                 Set(s, 'S');
-                return CreatePath(s, Up(s));
+                path = CreatePath(s, Up(s));
+                Set(s, '|');
+                return path;
             }
 
             Set(s, '-');
             if (CanLeft(s) && CanRight(s))
             {
                 Set(s, 'S');
-                return CreatePath(s, Left(s));
+                path = CreatePath(s, Left(s));
+                Set(s, '-');
+                return path;
             }
 
             Set(s, 'L');
             if (CanUp(s) && CanRight(s))
             {
                 Set(s, 'S');
-                return CreatePath(s, Right(s));
+                path = CreatePath(s, Right(s));
+                Set(s, 'L');
+                return path;
             }
 
             Set(s, 'J');
             if (CanUp(s) && CanLeft(s))
             {
                 Set(s, 'S');
-                return CreatePath(s, Left(s));
+                path = CreatePath(s, Left(s));
+                Set(s, 'J');
+                return path;
             }
 
             Set(s, '7');
             if (CanDown(s) && CanLeft(s))
             {
                 Set(s, 'S');
-                return CreatePath(s, Left(s));
+                path = CreatePath(s, Left(s));
+                Set(s, '7');
+                return path;
             }
 
             Set(s, 'F');
             if (CanDown(s) && CanRight(s))
             {
                 Set(s, 'S');
-                return CreatePath(s, Right(s));
+                path = CreatePath(s, Right(s));
+                Set(s, 'F');
+                return path;
             }
 
-            return new();
+            return path;
         }
 
         public List<Point> SpotsInLoop()
@@ -292,20 +304,33 @@ namespace AdventOfCode.Days
 
             for(int i = top; i <= bottom; ++i)
             {
-                for(int j = left; j <= right; ++j)
+                char last = '-';
+                bool isIn = false;
+                int count = 0;
+                for(int j = left - 1; j <= right; ++j)
                 {
-                    var curr = (i, j);
-                    if (!loop.Contains(curr))
-                    {
-                        Point u = Up(curr);
-                        Point d = Down(curr);
-                        Point l = Left(curr);
-                        Point r = Right(curr);
+                    if (j < 0) continue;
+                    char curr = Get((i, j));
 
-                        if (loop.Contains(u) && loop.Contains(d) && loop.Contains(l) && loop.Contains(r))
-                            found.Add(curr);
+                    if(loop.Contains((i, j)))
+                    {
+                        if (curr == '-') continue;
+
+                        if (last == 'L' && curr == '7' ||
+                        last == 'F' && curr == 'J' ||
+                        curr == '|')
+                        {
+                            isIn = !isIn;
+                        }
                     }
-                    
+
+                    if (!loop.Contains((i, j)) && isIn)
+                    {
+                        found.Add((i, j));
+                    }
+
+                    if(loop.Contains((i, j)))
+                        last = curr;
                 }
             }
 
