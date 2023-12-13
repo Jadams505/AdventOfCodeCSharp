@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using System.Text.Unicode;
 using System.Xml.XPath;
 
 namespace AdventOfCode.Days
@@ -42,20 +43,72 @@ namespace AdventOfCode.Days
         public override long GetSolution1()
         {
             long result = 0;
-
+            /*
             foreach(var r in Records)
             {
                 result += r.ListPermutations(r.Alternative.Count).Count();
             }
-
+            */
             return result;
+        }
+
+        public static int[] AlreadyDone()
+        {
+            var lines = File.ReadAllLines("day12_done.txt");
+            return Array.ConvertAll(lines, x => int.Parse(x));
+        }
+
+        public List<int> NumsToGo(int[] done)
+        {
+            List<int> thousand = new();
+            for(int i = 0; i < Records.Count; ++i)
+            {
+                thousand.Add(i);
+            }
+            return thousand.Except(done).ToList();
         }
 
         public override long GetSolution2()
         {
             long result = 0;
+            List<int> counts = new();
+            int start = 2;
+            List<int> toGo = NumsToGo(AlreadyDone());
+            var res = Parallel.For(0, toGo.Count, i =>
+            {
+                int index = toGo[i];
+                var r = Records[index];
+                r.Multiply(5);
+                int count = r.ListPermutations(r.Alternative.Count).Count();
+                counts.Add(count);
+                Console.WriteLine($"{index} {count}");
+            });
+            /*
+            for(int i = start; i < Records.Count; ++i)
+            {
+                var r = Records[i];
+                r.Multiply(5);
+                int count = r.ListPermutations(r.Alternative.Count).Count();
+                counts.Add(count);
+                Console.WriteLine($"{i} {count}");
+            }
+            */
+            File.WriteAllLines("day12_debug.txt", counts.ConvertAll(x => $"{start++} {x}"));
+            /*
+            foreach (var r in Records)
+            {
+                r.Multiply(2);
+            }
 
-            return result;
+            List<int> counts2 = new();
+            
+            foreach(var r in Records)
+            {
+                counts2.Add(r.ListPermutations(r.Alternative.Count).Count());
+            }
+            
+            */
+            return counts.Sum();
         }
     }
 
@@ -75,6 +128,18 @@ namespace AdventOfCode.Days
     {
         public List<State> States { get; set; } = new();
         public List<int> Alternative { get; set; } = new();
+
+        public void Multiply(int n)
+        {
+            List<State> oldStates = new(States);
+            List<int> oldNum = new(Alternative);
+            for(int i = 1; i < n; ++i)
+            {
+                States.Add(State.Unknown);
+                States.AddRange(oldStates);
+                Alternative.AddRange(oldNum);
+            }
+        }
 
         public static State CharToState(char c) => c switch
         {
@@ -109,6 +174,30 @@ namespace AdventOfCode.Days
                 4 => List4Permutations(),
                 5 => List5Permutations(),
                 6 => List6Permutations(),
+                7 => List7Permutations(),
+                8 => List8Permutations(),
+                9 => List9Permutations(),
+                10 => List10Permutations(),
+                11 => List11Permutations(),
+                12 => List12Permutations(),
+                13 => List13Permutations(),
+                14 => List14Permutations(),
+                15 => List15Permutations(),
+                16 => List16Permutations(),
+                17 => List17Permutations(),
+                18 => List18Permutations(),
+                19 => List19Permutations(),
+                20 => List20Permutations(),
+                21 => List21Permutations(),
+                22 => List22Permutations(),
+                23 => List23Permutations(),
+                24 => List24Permutations(),
+                25 => List25Permutations(),
+                26 => List26Permutations(),
+                27 => List27Permutations(),
+                28 => List28Permutations(),
+                29 => List29Permutations(),
+                30 => List30Permutations(),
                 _ => throw new Exception("Help me")
             };
         }
@@ -118,6 +207,17 @@ namespace AdventOfCode.Days
             for(int i = 0; i < States.Count; ++i)
             {
                 if (States[i] != State.Unknown && States[i] != perm[i])
+                    return false;
+            }
+            return true;
+        }
+
+        public bool ValidRange(List<State> curr, Range toCheck)
+        {
+            if (toCheck.Start.Value < 0 || toCheck.End.Value >= States.Count) return false;
+            for(int i = toCheck.Start.Value; i < toCheck.End.Value; ++i)
+            {
+                if (States[i] != State.Unknown && States[i] != curr[i - toCheck.Start.Value])
                     return false;
             }
             return true;
