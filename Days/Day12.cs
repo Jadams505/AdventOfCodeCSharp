@@ -72,27 +72,30 @@ namespace AdventOfCode.Days
         {
             long result = 0;
             List<int> counts = new();
-            int start = 2;
-            List<int> toGo = NumsToGo(AlreadyDone());
-            var res = Parallel.For(0, toGo.Count, i =>
+            int start = 0;
+            /*
+            //List<int> toGo = NumsToGo(AlreadyDone());
+            var res = Parallel.For(0, Records.Count, i =>
             {
-                int index = toGo[i];
+                //int index = toGo[i];
+                int index = i;
                 var r = Records[index];
-                r.Multiply(5);
+                r.Multiply(2);
                 int count = r.ListPermutations(r.Alternative.Count).Count();
                 counts.Add(count);
                 Console.WriteLine($"{index} {count}");
             });
-            /*
-            for(int i = start; i < Records.Count; ++i)
+            */
+            
+            for(int i = start; i < 20; ++i)
             {
                 var r = Records[i];
-                r.Multiply(5);
+                r.Multiply(3);
                 int count = r.ListPermutations(r.Alternative.Count).Count();
                 counts.Add(count);
                 Console.WriteLine($"{i} {count}");
             }
-            */
+            
             File.WriteAllLines("day12_debug.txt", counts.ConvertAll(x => $"{start++} {x}"));
             /*
             foreach (var r in Records)
