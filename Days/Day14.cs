@@ -34,11 +34,12 @@ namespace AdventOfCode.Days
         public override long GetSolution1()
         {
             long result = 0;
-            /*
+            
             for(int i = 0; i < Data.Data.Count; ++i)
-            Data.SlideUp(Data.Data.Count - 1);
+                Data.SlideUp(Data.Data.Count - 1);
+            
             result = Data.Score();
-            */
+            
             return result;
         }
 
@@ -48,10 +49,8 @@ namespace AdventOfCode.Days
         {
             long result = 0;
 
-            for(int i = 1; i < 1000000000 - 1; ++i)
+            for(int i = 1; i < 1000000000 + 1; ++i)
             {
-                if (i % 1000000 == 0)
-                    Console.WriteLine(i);
                 Data.Cycle();
                 long score = Data.Score();
                 if (Lookup.ContainsKey(score))

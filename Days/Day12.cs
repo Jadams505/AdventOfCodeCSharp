@@ -43,12 +43,12 @@ namespace AdventOfCode.Days
         public override long GetSolution1()
         {
             long result = 0;
-            /*
+            
             foreach(var r in Records)
             {
-                result += r.ListPermutations(r.Alternative.Count).Count();
+                result += r.CountPermutations();
             }
-            */
+            
             return result;
         }
 
@@ -73,34 +73,36 @@ namespace AdventOfCode.Days
             long result = 0;
             List<int> counts = new();
             int start = 0;
-            /*
+            
             //List<int> toGo = NumsToGo(AlreadyDone());
-            var res = Parallel.For(0, Records.Count, i =>
+            /*
+            var res = Parallel.For(0, 10, i =>
             {
                 //int index = toGo[i];
                 int index = i;
                 var r = Records[index];
-                r.Multiply(2);
+                r.Multiply(4);
                 int count = r.ListPermutations(r.Alternative.Count).Count();
                 counts.Add(count);
                 Console.WriteLine($"{index} {count}");
             });
             */
             
-            for(int i = start; i < 20; ++i)
+            for(int i = start; i < 10; ++i)
             {
                 var r = Records[i];
-                r.Multiply(3);
-                int count = r.ListPermutations(r.Alternative.Count).Count();
-                counts.Add(count);
+                r.Add(State.Unknown, State.Unknown);
+                long count = r.CountPermutations();
+                counts.Add((int)count);
                 Console.WriteLine($"{i} {count}");
             }
             
-            File.WriteAllLines("day12_debug.txt", counts.ConvertAll(x => $"{start++} {x}"));
+            //File.WriteAllLines("day12_debug.txt", counts.ConvertAll(x => $"{start++} {x}"));
+            
             /*
             foreach (var r in Records)
             {
-                r.Multiply(2);
+               // r.Multiply(2);
             }
 
             List<int> counts2 = new();
@@ -109,8 +111,8 @@ namespace AdventOfCode.Days
             {
                 counts2.Add(r.ListPermutations(r.Alternative.Count).Count());
             }
-            
             */
+            
             return counts.Sum();
         }
     }
@@ -138,7 +140,20 @@ namespace AdventOfCode.Days
             List<int> oldNum = new(Alternative);
             for(int i = 1; i < n; ++i)
             {
-                States.Add(State.Unknown);
+                States.Add(State.Damaged);
+                States.AddRange(oldStates);
+                Alternative.AddRange(oldNum);
+            }
+        }
+
+        public void Add(params State[] betweens)
+        {
+            List<State> oldStates = new(States);
+            List<int> oldNum = new(Alternative);
+
+            for (int i = 0; i < betweens.Length; ++i)
+            {
+                States.Add(betweens[i]);
                 States.AddRange(oldStates);
                 Alternative.AddRange(oldNum);
             }
@@ -217,7 +232,7 @@ namespace AdventOfCode.Days
 
         public bool ValidRange(List<State> curr, Range toCheck)
         {
-            if (toCheck.Start.Value < 0 || toCheck.End.Value >= States.Count) return false;
+            if (toCheck.Start.Value < 0 || toCheck.End.Value > States.Count) return false;
             for(int i = toCheck.Start.Value; i < toCheck.End.Value; ++i)
             {
                 if (States[i] != State.Unknown && States[i] != curr[i - toCheck.Start.Value])

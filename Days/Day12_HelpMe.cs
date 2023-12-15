@@ -1,4 +1,8 @@
-﻿namespace AdventOfCode.Days
+﻿using System.Collections;
+using System;
+using System.Collections.Generic;
+
+namespace AdventOfCode.Days
 {
     public partial class Record
     {
@@ -3340,6 +3344,40 @@
                         yield return curr;
                 }
             }
+        }
+
+        public long CountPermutations(int index, int length, Range lastRange)
+        {
+            long count = 0;
+            if (index == Alternative.Count - 1)
+            {
+               // long count = 0;
+                Range range = new(lastRange.End, States.Count);
+                foreach (var list in EnumeratePermutations(Alternative[index], length))
+                {
+                    if (!ValidRange(list, range)) continue;
+                    count++;
+                }
+                //return count;
+            }
+            else
+            {
+                foreach (var list in EnumeratePermutations(Alternative[index], length))
+                {
+                    int list3Range = list.LastIndexOf(State.Damaged) + 2;
+                    Range range3 = new(lastRange.End, lastRange.End.Value + list3Range);
+                    if (!ValidRange(list, range3)) continue;
+                    count += CountPermutations(index + 1, length - list3Range, range3);
+                }
+            }
+
+            return count;
+        }
+
+        public long CountPermutations()
+        {
+            long count = 0;
+            return CountPermutations(0, States.Count, new Range(0, 0));
         }
 
         public IEnumerable<List<State>> List1Permutations()
