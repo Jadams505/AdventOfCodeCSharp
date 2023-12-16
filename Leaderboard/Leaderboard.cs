@@ -21,6 +21,12 @@ namespace AdventOfCode.Leaderboard
             Parse();
         }
 
+        public Leaderboard CombineMembers(Leaderboard other)
+        {
+            Stats.Members = Stats.Members.UnionBy(other.Stats.Members, x => x.Name).ToList();
+            return this;
+        }
+
         public void GetLeaderboardFromWeb()
         {
             FileInfo existingFile = new(LeaderboardFile);
