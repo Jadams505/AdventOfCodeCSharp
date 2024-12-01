@@ -10,7 +10,7 @@ namespace AdventOfCode.Days
 
         public override void ConvertData()
         {
-            string[] contents = File.ReadAllLines(FilePath);
+            string[] contents = File.ReadAllLines(SolutionFilePath);
 
             foreach (string s in contents)
             {

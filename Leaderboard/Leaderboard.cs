@@ -62,7 +62,10 @@ namespace AdventOfCode.Leaderboard
         {
             var now = DateTime.Now;
             var first = new DateTime(Stats.Event, 12, 1);
-            var delta = now - first;
+            var last = new DateTime(Stats.Event, 12, 26);
+            var delta = now >= last 
+                ? last - first 
+                : now - first;
             return (int)Math.Ceiling(delta.TotalDays);
         }
 

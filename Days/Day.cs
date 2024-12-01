@@ -6,7 +6,8 @@ namespace AdventOfCode.Days
 {
     internal abstract partial class Day
     {
-        public virtual string FilePath => $"Input/{GetType().Name.ToLower()}.txt";
+        public virtual int Year { get; } = 2023; 
+        public virtual string FilePath => $"Input/{Year}/{GetType().Name.ToLower()}.txt";
         public string SolutionFilePath => $"../../../{FilePath}";
 
         [GeneratedRegex(@"\d+")]
@@ -25,7 +26,7 @@ namespace AdventOfCode.Days
             var timer = new Stopwatch();
             timer.Start();
             DownloadInput();
-            CopyToBin();
+            //CopyToBin();
             ConvertData();
             PrintSolution1();
             PrintSolution2();
@@ -52,6 +53,8 @@ namespace AdventOfCode.Days
         public void DownloadInput()
         {
             FileInfo solution = new(SolutionFilePath);
+            if (solution.Directory is not null)
+                Directory.CreateDirectory(solution.Directory.FullName);
             if(!solution.Exists)
             {
                 var client = new WebClient();
@@ -61,7 +64,7 @@ namespace AdventOfCode.Days
                 try
                 {
                     client.DownloadFile(
-                    address: $"https://adventofcode.com/2023/day/{day}/input",
+                    address: $"https://adventofcode.com/{Year}/day/{day}/input",
                     fileName: SolutionFilePath);
                 }
                 catch (Exception ex)
