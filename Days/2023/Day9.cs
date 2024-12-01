@@ -1,110 +1,109 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace AdventOfCode.Days
+namespace AdventOfCode.Days;
+
+internal class Day9 : Day
 {
-    internal class Day9 : Day
+    public override Regex ParseString => throw new NotImplementedException();
+
+    List<List<long>> Nums = new();
+
+    public override void ConvertData()
     {
-        public override Regex ParseString => throw new NotImplementedException();
+        var contents = File.ReadAllLines(FilePath);
 
-        List<List<long>> Nums = new();
-
-        public override void ConvertData()
+        foreach(var line in contents)
         {
-            var contents = File.ReadAllLines(FilePath);
-
-            foreach(var line in contents)
+            List<long> toAdd = new();
+            Regex reg = new Regex(@"-?\d+");
+            var match = reg.Match(line);
+            while (match.Success)
             {
-                List<long> toAdd = new();
-                Regex reg = new Regex(@"-?\d+");
-                var match = reg.Match(line);
-                while (match.Success)
-                {
-                    toAdd.Add(long.Parse(match.Value));
-                    match = match.NextMatch();
-                }
-                Nums.Add(toAdd);
+                toAdd.Add(long.Parse(match.Value));
+                match = match.NextMatch();
             }
+            Nums.Add(toAdd);
+        }
+    }
+
+    public List<long> ExtrapolateNext(List<long> list)
+    {
+        List<long> ret = new();
+        long curr = list[0];
+        long diff = 0;
+        for(int i = 1; i < list.Count; ++i)
+        {
+            diff = list[i] - curr;
+            curr = list[i];
+            ret.Add(diff);
         }
 
-        public List<long> ExtrapolateNext(List<long> list)
-        {
-            List<long> ret = new();
-            long curr = list[0];
-            long diff = 0;
-            for(int i = 1; i < list.Count; ++i)
-            {
-                diff = list[i] - curr;
-                curr = list[i];
-                ret.Add(diff);
-            }
+        return ret;
+    }
 
-            return ret;
-        }
-
-        public List<List<long>> ExtrapolateToZero(List<long> list)
+    public List<List<long>> ExtrapolateToZero(List<long> list)
+    {
+        List<List<long>> all = new();
+        all.Add(list);
+        var curr = ExtrapolateNext(list);
+        while(!curr.All(x => x == 0))
         {
-            List<List<long>> all = new();
-            all.Add(list);
-            var curr = ExtrapolateNext(list);
-            while(!curr.All(x => x == 0))
-            {
-                all.Add(curr);
-                curr = ExtrapolateNext(curr);
-            }
             all.Add(curr);
-            return all;
+            curr = ExtrapolateNext(curr);
         }
+        all.Add(curr);
+        return all;
+    }
 
-        public long GetPlaceholder(List<List<long>> lists)
+    public long GetPlaceholder(List<List<long>> lists)
+    {
+        long placeholder = 0;
+        for (int i = lists.Count - 2; i >= 0; --i)
         {
-            long placeholder = 0;
-            for (int i = lists.Count - 2; i >= 0; --i)
-            {
-                var temp = lists[i];
-                long curr = temp[^1];
-                placeholder += curr;
-            }
-
-            return placeholder;
+            var temp = lists[i];
+            long curr = temp[^1];
+            placeholder += curr;
         }
 
-        public long GetPlaceholder2(List<List<long>> lists)
+        return placeholder;
+    }
+
+    public long GetPlaceholder2(List<List<long>> lists)
+    {
+        long placeholder = 0;
+        for (int i = lists.Count - 2; i >= 0; --i)
         {
-            long placeholder = 0;
-            for (int i = lists.Count - 2; i >= 0; --i)
-            {
-                var temp = lists[i];
-                long curr = temp[0];
-                placeholder = curr - placeholder;
-            }
-
-            return placeholder;
+            var temp = lists[i];
+            long curr = temp[0];
+            placeholder = curr - placeholder;
         }
 
-        public override long GetSolution1()
+        return placeholder;
+    }
+
+    public override long GetSolution1()
+    {
+        long result = 0;
+
+        foreach(var x in Nums)
         {
-            long result = 0;
-
-            foreach(var x in Nums)
-            {
-                var extrap = ExtrapolateToZero(x);
-                result += GetPlaceholder(extrap);
-            }
-
-            return result;
+            var extrap = ExtrapolateToZero(x);
+            result += GetPlaceholder(extrap);
         }
 
-        public override long GetSolution2()
+        return result;
+    }
+
+    public override long GetSolution2()
+    {
+        long result = 0;
+
+        foreach (var x in Nums)
         {
-            long result = 0;
-
-            foreach (var x in Nums)
-            {
-                var extrap = ExtrapolateToZero(x);
-                result += GetPlaceholder2(extrap);
-            }
-
-            return result;
+            var extrap = ExtrapolateToZero(x);
+            result += GetPlaceholder2(extrap);
         }
+
+        return result;
     }
 }

@@ -2,8 +2,8 @@
 using AdventOfCode.Days._2024;
 using System.Reflection;
 
-namespace AdventOfCode
-{
+namespace AdventOfCode;
+
 	internal class Program
 	{
 		static void Main(string[] args)
@@ -11,4 +11,3 @@ namespace AdventOfCode
 			new Day1_2024();
 		}
 	}
-}

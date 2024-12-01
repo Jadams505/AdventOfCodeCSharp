@@ -2,99 +2,98 @@
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace AdventOfCode.Days
+namespace AdventOfCode.Days;
+
+internal abstract partial class Day
 {
-    internal abstract partial class Day
+    public virtual int Year { get; } = 2023; 
+    public virtual string FilePath => $"Input/{Year}/{GetType().Name.ToLower()}.txt";
+    public string SolutionFilePath => $"../../../{FilePath}";
+
+    [GeneratedRegex(@"\d+")]
+    public partial Regex Number();
+
+    [GeneratedRegex(@"\w+")]
+    public partial Regex Word();
+
+    [GeneratedRegex(@"[a-zA-Z0-9]+")]
+    public partial Regex NumberLetter();
+
+    public abstract Regex ParseString { get; }
+
+    public Day()
     {
-        public virtual int Year { get; } = 2023; 
-        public virtual string FilePath => $"Input/{Year}/{GetType().Name.ToLower()}.txt";
-        public string SolutionFilePath => $"../../../{FilePath}";
+        var timer = new Stopwatch();
+        timer.Start();
+        DownloadInput();
+        //CopyToBin();
+        ConvertData();
+        PrintSolution1();
+        PrintSolution2();
+        timer.Stop();
+        Console.WriteLine("Execution Time: " + timer.ElapsedMilliseconds + "ms");
+    }
 
-        [GeneratedRegex(@"\d+")]
-        public partial Regex Number();
+    public abstract void ConvertData();
 
-        [GeneratedRegex(@"\w+")]
-        public partial Regex Word();
+    public abstract long GetSolution1();
 
-        [GeneratedRegex(@"[a-zA-Z0-9]+")]
-        public partial Regex NumberLetter();
+    public abstract long GetSolution2();
 
-        public abstract Regex ParseString { get; }
+    public void PrintSolution1()
+    {
+        Console.WriteLine("Solution1: " + GetSolution1());
+    }
 
-        public Day()
+    public void PrintSolution2()
+    {
+        Console.WriteLine("Solution2: " + GetSolution2());
+    }
+
+    public void DownloadInput()
+    {
+        FileInfo solution = new(SolutionFilePath);
+        if (solution.Directory is not null)
+            Directory.CreateDirectory(solution.Directory.FullName);
+        if(!solution.Exists)
         {
-            var timer = new Stopwatch();
-            timer.Start();
-            DownloadInput();
-            //CopyToBin();
-            ConvertData();
-            PrintSolution1();
-            PrintSolution2();
-            timer.Stop();
-            Console.WriteLine("Execution Time: " + timer.ElapsedMilliseconds + "ms");
-        }
+            var client = new WebClient();
+            client.Headers.Add(HttpRequestHeader.Cookie, $"session={Secret.SessionCookie}");
+            client.Headers.Add(HttpRequestHeader.UserAgent, "github.com/Jadams505/AdventOfCodeCSharp"); // header to comply with https://www.reddit.com/r/adventofcode/comments/z9dhtd/please_include_your_contact_info_in_the_useragent/
+            int day = int.Parse(Regex.Match(this.GetType().Name, @"\d+").Value);
 
-        public abstract void ConvertData();
-
-        public abstract long GetSolution1();
-
-        public abstract long GetSolution2();
-
-        public void PrintSolution1()
-        {
-            Console.WriteLine("Solution1: " + GetSolution1());
-        }
-
-        public void PrintSolution2()
-        {
-            Console.WriteLine("Solution2: " + GetSolution2());
-        }
-
-        public void DownloadInput()
-        {
-            FileInfo solution = new(SolutionFilePath);
-            if (solution.Directory is not null)
-                Directory.CreateDirectory(solution.Directory.FullName);
-            if(!solution.Exists)
+            try
             {
-                var client = new WebClient();
-                client.Headers.Add(HttpRequestHeader.Cookie, $"session={Secret.SessionCookie}");
-                client.Headers.Add(HttpRequestHeader.UserAgent, "github.com/Jadams505/AdventOfCodeCSharp"); // header to comply with https://www.reddit.com/r/adventofcode/comments/z9dhtd/please_include_your_contact_info_in_the_useragent/
-                int day = int.Parse(Regex.Match(this.GetType().Name, @"\d+").Value);
-
+                client.DownloadFile(
+                address: $"https://adventofcode.com/{Year}/day/{day}/input",
+                fileName: SolutionFilePath);
+            }
+            catch (Exception ex)
+            {
                 try
                 {
-                    client.DownloadFile(
-                    address: $"https://adventofcode.com/{Year}/day/{day}/input",
-                    fileName: SolutionFilePath);
+                    File.Delete(SolutionFilePath);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    try
-                    {
-                        File.Delete(SolutionFilePath);
-                    }
-                    catch (Exception)
-                    {
 
-                    }
                 }
-                
             }
+            
         }
+    }
 
-        public void CopyToBin()
+    public void CopyToBin()
+    {
+        FileInfo solution = new(SolutionFilePath);
+        FileInfo bin = new(FilePath);
+
+        if (!solution.Exists)
+            return;
+
+        if(!bin.Exists || solution.LastWriteTime.Ticks > bin.LastWriteTime.Ticks)
         {
-            FileInfo solution = new(SolutionFilePath);
-            FileInfo bin = new(FilePath);
-
-            if (!solution.Exists)
-                return;
-
-            if(!bin.Exists || solution.LastWriteTime.Ticks > bin.LastWriteTime.Ticks)
-            {
-                File.Copy(solution.FullName, bin.FullName, overwrite: true);
-            }
+            File.Copy(solution.FullName, bin.FullName, overwrite: true);
         }
     }
 }

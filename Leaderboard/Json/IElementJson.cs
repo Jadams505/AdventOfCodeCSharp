@@ -1,9 +1,8 @@
 ﻿using System.Text.Json;
 
-namespace AdventOfCode.Leaderboard.Json
+namespace AdventOfCode.Leaderboard.Json;
+
+internal interface IElementJson<T>
 {
-    internal interface IElementJson<T>
-    {
-        static abstract T Deserialize(JsonElement json);
-    }
+    static abstract T Deserialize(JsonElement json);
 }
