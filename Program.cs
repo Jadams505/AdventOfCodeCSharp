@@ -4,10 +4,10 @@ using System.Reflection;
 
 namespace AdventOfCode;
 
-	internal class Program
+internal class Program
+{
+	static void Main(string[] args)
 	{
-		static void Main(string[] args)
-		{
-			new Day1_2024();
-		}
+		new Day1_2024();
 	}
+}

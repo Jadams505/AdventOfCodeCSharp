@@ -76,7 +76,17 @@ internal abstract partial class Day
                 }
                 catch (Exception)
                 {
-
+                    
+                }
+                finally
+                {
+                    Console.WriteLine
+                    (
+                        $"""
+                        Failed to download file with message:
+                        {ex.Message}
+                        """
+                    );
                 }
             }
             
