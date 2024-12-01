@@ -4,11 +4,12 @@ internal class Runner
 {
     public static void Main(string[] args)
     {
-        Leaderboard jet = new(Secret.JetLeaderboard, 2023);
-        Leaderboard dad = new(Secret.DadLeaderboard, 2023);
+        int year = 2024;
+        Leaderboard jet = new(Secret.JetLeaderboard, year);
+        Leaderboard dad = new(Secret.DadLeaderboard, year);
         Leaderboard combined = jet.CombineMembers(dad);
         LeaderboardTable table = new(combined);
-        string outputFile = "Leaderboard.txt";
+        string outputFile = $"Leaderboard_{year}.txt";
 
         Console.WriteLine(table);
         table.WriteToFile(outputFile);

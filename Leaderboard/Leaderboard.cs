@@ -43,6 +43,7 @@ internal class Leaderboard
 
         var client = new WebClient();
         client.Headers.Add(HttpRequestHeader.Cookie, $"session={Secret.SessionCookie}");
+        client.Headers.Add(HttpRequestHeader.UserAgent, "github.com/Jadams505/AdventOfCodeCSharp"); // header to comply with https://www.reddit.com/r/adventofcode/comments/z9dhtd/please_include_your_contact_info_in_the_useragent/
         byte[] data = client.DownloadData(
             address: $"https://adventofcode.com/{Year}/leaderboard/private/view/{LeaderboardId}.json");
 
