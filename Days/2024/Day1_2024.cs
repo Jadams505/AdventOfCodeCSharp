@@ -6,31 +6,15 @@ internal class Day1_2024 : Day2024
 {
     public override Regex ParseString => throw new NotImplementedException();
 
-    public List<string> Contents { get; } = [];
-
-    public List<int> Numbers { get; } = [];
-
     public List<(int, int)> Data { get; } = [];
+
+    public List<int> List1 { get; } = [];
+
+    public List<int> List2 { get; } = [];
 
     public override void ConvertData()
     {
         string[] contents = File.ReadAllLines(SolutionFilePath);
-
-        Contents.AddRange(contents);
-        try
-        {
-            Numbers.AddRange(contents.Select(entry => int.Parse(Number().Match(entry).Value)));
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine
-            (
-                $"""
-                Failed to convert input to numbers with message:
-                {ex.Message}
-                """
-            );
-        }
 
         foreach (var s in contents)
         {
@@ -38,13 +22,14 @@ internal class Day1_2024 : Day2024
             var num2 = num1.NextMatch();
 
             Data.Add((int.Parse(num1.Value), int.Parse(num2.Value)));
+
+            List1.Add(int.Parse(num1.Value));
+            List2.Add(int.Parse(num2.Value));
         }
     }
 
-    public override long GetSolution1()
+    public long GetOldSolution1()
     {
-        long ret = 0;
-
         var first = Data.Select(x => x.Item1).Order().ToList();
         var second = Data.Select(x => x.Item2).Order().ToList();
 
@@ -52,7 +37,17 @@ internal class Day1_2024 : Day2024
 
         var sum = dist.Sum();
 
-        return OneLinerSolution1();
+        return sum;
+    }
+
+    public override long GetSolution1()
+    {
+        var first = List1.Order();
+        var second = List2.Order();
+
+        var sum = first.Zip(second, (a, b) => Math.Abs(b - a)).Sum();
+
+        return sum;
     }
 
     public long OneLinerSolution1() => Data.Select(x => x.Item1).Order().Index()
@@ -63,10 +58,8 @@ internal class Day1_2024 : Day2024
             resultSelector: (first, second) => Math.Abs(second.Item - first.Item))
         .Sum();
 
-    public override long GetSolution2()
+    public long OldSolution2()
     {
-        long ret = 0;
-
         var first = Data.Select(x => x.Item1).ToList();
         var second = Data.Select(x => x.Item2).ToList();
 
@@ -78,12 +71,30 @@ internal class Day1_2024 : Day2024
             total += x;
         }
 
-        var dist = first.Aggregate(0, (total, entry) => total + entry * second.Count(e => e == entry));
+        return total;
+    }
 
-        List<int> test = [1, 2, 3, 2, -1];
-        var sum = test.Aggregate(0, (total, curr) => total + (curr * 3));
+    public override long GetSolution2()
+    {
+        var countLookup = List2
+            .GroupBy(num => num)
+            .ToDictionary(
+                keySelector: group => group.Key, 
+                elementSelector: group => group.Count());
 
-        return OneLinerSolution2();
+        var total = List1
+            .Aggregate(0, (sum, entry) => 
+                sum + entry * countLookup.GetValueOrDefault(entry, 0));
+
+        //long sum = 0;
+        //foreach(var entry in List1)
+        //{
+        //    var count = countLookup.GetValueOrDefault(entry, 0);
+        //    var score = entry * count;
+        //    sum += score;
+        //}
+
+        return total;
     }
 
     public long OneLinerSolution2() => Data.Select(x => x.Item1)
