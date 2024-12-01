@@ -48,14 +48,20 @@ internal class Day1_2024 : Day2024
         var first = Data.Select(x => x.Item1).Order().ToList();
         var second = Data.Select(x => x.Item2).Order().ToList();
 
-        var dist = new List<int>();
-        for (int i = 0; i < first.Count; ++i)
-        {
-            dist.Add(Math.Abs(second[i] - first[i]));
-        }
+        var dist = first.Index().Join(second.Index(), first => first.Index, second => second.Index, (first, second) => Math.Abs(second.Item - first.Item));
 
-        return dist.Sum();
+        var sum = dist.Sum();
+
+        return OneLinerSolution1();
     }
+
+    public long OneLinerSolution1() => Data.Select(x => x.Item1).Order().Index()
+        .Join(
+            inner: Data.Select(x => x.Item2).Order().Index(),
+            outerKeySelector: first => first.Index, 
+            innerKeySelector: second => second.Index, 
+            resultSelector: (first, second) => Math.Abs(second.Item - first.Item))
+        .Sum();
 
     public override long GetSolution2()
     {
@@ -72,6 +78,17 @@ internal class Day1_2024 : Day2024
             total += x;
         }
 
-        return total;
+        var dist = first.Aggregate(0, (total, entry) => total + entry * second.Count(e => e == entry));
+
+        List<int> test = [1, 2, 3, 2, -1];
+        var sum = test.Aggregate(0, (total, curr) => total + (curr * 3));
+
+        return OneLinerSolution2();
     }
+
+    public long OneLinerSolution2() => Data.Select(x => x.Item1)
+        .Aggregate(
+        seed: 0, 
+        func: (total, entry) => total + entry * Data.Select(x => x.Item2)
+            .Count(e => e == entry));
 }
