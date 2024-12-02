@@ -28,133 +28,52 @@ internal class Day2_2024 : Day2024
 
     public override long GetSolution1()
     {
-        int safes = 0;
-        foreach (var row in Data)
-        {
-            int curr = row[0];
-            int next = row[1];
-
-            bool? decreasing = null;
-            bool? increasing = null;
-            bool safe = true;
-            for (int i = 1; i < row.Count; ++i)
-            {
-                next = row[i];
-                
-                if (next > curr)
-                {
-                    increasing = true;
-                }
-                else if (next < curr)
-                {
-                    decreasing = true;
-                }
-                else
-                {
-                    safe = false;
-                    break;
-                }
-
-                if (decreasing is true && increasing is true)
-                {
-                    safe = false;
-                    break;
-                }
-
-                if (!(Math.Abs(curr - next) >= 1 && Math.Abs(curr - next) <= 3))
-                {
-                    safe = false;
-                    break;
-                }
-                curr = next;
-            }
-
-            if (safe)
-            {
-                safes++;
-            }
-        }
-        return safes;
+        return Data.Count(CheckSafeRow);
     }
 
-    public static bool IsSafe(List<int> row)
+    public static List<int> ComputeDiffs(List<int> row)
     {
-        int curr = row[0];
-        int next = row[1];
-
-        bool? decreasing = null;
-        bool? increasing = null;
-        bool safe = true;
-        for (int i = 1; i < row.Count; ++i)
+        var diffs = new List<int>();
+        for (int i = 0; i < row.Count - 1; ++i)
         {
-            next = row[i];
-
-            if (next > curr)
-            {
-                increasing = true;
-            }
-            else if (next < curr)
-            {
-                decreasing = true;
-            }
-            else
-            {
-                safe = false;
-                break;
-            }
-
-            if (decreasing is true && increasing is true)
-            {
-                safe = false;
-                break;
-            }
-
-            if (!(Math.Abs(curr - next) >= 1 && Math.Abs(curr - next) <= 3))
-            {
-                safe = false;
-                break;
-            }
-            curr = next;
+            var curr = row[i];
+            var next = row[i + 1];
+            diffs.Add(next - curr);
         }
 
-        return safe;
+        return diffs;
+    }
+
+    public static bool CheckSafeDiffs(List<int> diffs)
+    {
+        bool increasing = diffs.All(num => num is 1 or 2 or 3);
+        bool decreasing = diffs.All(num => num is -1 or -2 or -3);
+
+        return increasing || decreasing;
+    }
+
+
+    public static bool CheckSafeRow(List<int> row)
+    {
+        var diffs = ComputeDiffs(row);
+
+        return CheckSafeDiffs(diffs);
+    }
+
+    public static bool CheckSafeWithRemoval(List<int> row)
+    {
+        for (int i = 0; i < row.Count; ++i)
+        {
+            var copy = new List<int>(row);
+            copy.RemoveAt(i);
+            if (CheckSafeRow(copy)) return true;
+        }
+
+        return false;
     }
 
     public override long GetSolution2()
     {
-
-        int safes = 0;
-        List<List<int>> Unsafe = [];
-        foreach (var row in Data)
-        {
-            bool safe = IsSafe(row);
-            if (safe)
-            {
-                safes++;
-            }
-            else
-            {
-                Unsafe.Add(row);
-            }
-        }
-
-        foreach(var row in Unsafe)
-        {
-            
-            for (int i = 0; i < row.Count; ++i)
-            {
-                var temp = new List<int>(row);
-                temp.RemoveAt(i);
-                bool safe = IsSafe(temp);
-                if (safe)
-                {
-                    safes++;
-                    break;
-                }
-            }
-        }
-
-
-        return safes;
+        return Data.Count(CheckSafeWithRemoval);
     }
 }
