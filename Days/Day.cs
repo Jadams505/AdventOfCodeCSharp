@@ -57,10 +57,17 @@ internal abstract partial class Day
             Directory.CreateDirectory(solution.Directory.FullName);
         if(!solution.Exists)
         {
+            int day = int.Parse(Regex.Match(this.GetType().Name, @"\d+").Value);
+            var downloadTime = new DateTime(Year, 12, day);
+            if (DateTime.Now < downloadTime)
+            {
+                throw new Exception($"Error. It is too early to request data for {downloadTime}");
+            }
+
             var client = new WebClient();
             client.Headers.Add(HttpRequestHeader.Cookie, $"session={Secret.SessionCookie}");
             client.Headers.Add(HttpRequestHeader.UserAgent, "github.com/Jadams505/AdventOfCodeCSharp"); // header to comply with https://www.reddit.com/r/adventofcode/comments/z9dhtd/please_include_your_contact_info_in_the_useragent/
-            int day = int.Parse(Regex.Match(this.GetType().Name, @"\d+").Value);
+            
 
             try
             {
