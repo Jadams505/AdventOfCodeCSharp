@@ -8,7 +8,8 @@ internal class Program
 {
 	static void Main(string[] args)
 	{
-		new Day2_2024();
+		new Day3_2024();
+		//new Day2_2024();
 		//new Day1_2024();
 	}
 }
