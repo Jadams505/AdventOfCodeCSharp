@@ -54,6 +54,6 @@ internal class Day3_2024 : Day2024
 
     public override long GetSolution2()
     {
-        return DoMulData.Aggregate(0, (total, curr) => total + curr.Item1 * curr.Item2); ;
+        return DoMulData.Aggregate(0, (total, curr) => total + curr.Item1 * curr.Item2);
     }
 }
