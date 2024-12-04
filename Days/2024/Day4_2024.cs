@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AdventOfCode.Days._2024;
@@ -30,51 +29,17 @@ internal class Day4_2024 : Day2024
         return builder.ToString();
     }
 
-    public string Flatten(List<(int, int)> indexes)
-    {
-        var builder = new StringBuilder();
-
-        foreach(var i in indexes)
-        {
-            builder.Append(i.Item1);
-            builder.Append(i.Item2);
-        }
-
-        return builder.ToString();
-    }
-
-    public List<HashSet<(int, int)>> Found { get; } = [];
-    public bool CheckAndCache(List<(int, int)> indexes)
+    public bool CheckXMAS(List<(int, int)> indexes)
     {
         var word = Convert(indexes);
         if (word is "XMAS" or "SAMX")
         {
-            var set = indexes.ToHashSet();
-            var contains = Found.Contains(set, new SetEqualityComparer<(int, int)>());
-            if (contains) return false;
-
-            Found.Add(set);
             return true;
         }
         return false;
     }
 
-    public class SetEqualityComparer<T> : IEqualityComparer<HashSet<T>>
-    {
-        public bool Equals(HashSet<T>? x, HashSet<T>? y)
-        {
-            if (x is null) return false;
-            if (y is null) return false;
-            return x.SetEquals(y);
-        }
-
-        public int GetHashCode([DisallowNull] HashSet<T> obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-
-
+    // Scans a 7x7 area looking for XMAS with startI and startJ as the center
     public int CheckXMAS(int startI, int startJ)
     {
         var len = 4;
@@ -94,8 +59,6 @@ internal class Day4_2024 : Day2024
             {
                 if (i < 0 || i >= Data.Count) continue;
                 if (j < 0 || j >= Data[i].Length) continue;
-
-                //if (i == startI && j == startJ) continue;
 
                 var curr = Data[i][j];
                 var currIndex = (i, j);
@@ -123,44 +86,37 @@ internal class Day4_2024 : Day2024
 
         List<bool> checks = 
         [
-            CheckAndCache(topLeft),
-            CheckAndCache(top),
-            CheckAndCache(topRight),
-            CheckAndCache(bottomLeft),
-            CheckAndCache(bottomRight),
-            CheckAndCache(bottom),
-            CheckAndCache(left),
-            CheckAndCache(right)
+            CheckXMAS(topLeft),
+            CheckXMAS(top),
+            CheckXMAS(topRight),
+            CheckXMAS(bottomLeft),
+            CheckXMAS(bottomRight),
+            CheckXMAS(bottom),
+            CheckXMAS(left),
+            CheckXMAS(right)
         ];
 
         return checks.Count(c => c);
     }
 
-    public List<HashSet<(int, int)>> Found2 { get; } = [];
-    public bool CheckAndCache2(List<(int, int)> leftDiag, List<(int, int)> rightDiag)
+    public bool CheckX_MAS(List<(int, int)> leftDiag, List<(int, int)> rightDiag)
     {
         var word = Convert(leftDiag);
         var word2 = Convert(rightDiag);
         if (word is "MAS" or "SAM" && word2 is "MAS" or "SAM")
         {
-            var set = leftDiag.Concat(rightDiag).ToHashSet();
-            var contains = Found2.Contains(set, new SetEqualityComparer<(int, int)>());
-            if (contains) return false;
-
-            Found2.Add(set);
             return true;
         }
         return false;
     }
 
-    public int CheckX_MAS(int startI, int startJ)
+    // Scans a 3x3 area looking for X-MAS with startI and startJ as the center
+    public bool CheckX_MAS(int startI, int startJ)
     {
         var len = 2;
 
-        var topLeft = new List<(int, int)>();
-        var topRight = new List<(int, int)>();
-        var bottomLeft = new List<(int, int)>();
-        var bottomRight = new List<(int, int)>();
+        var leftDiag = new List<(int, int)>();
+        var rightDiag = new List<(int, int)>();
 
         for (int i = startI - len + 1; i < startI + len; ++i)
         {
@@ -173,18 +129,18 @@ internal class Day4_2024 : Day2024
                 var currIndex = (i, j);
                 if (Math.Abs(startI - i) == Math.Abs(startJ - j))
                 {
-                    if (i <= startI && j <= startJ) topLeft.Add(currIndex);
-                    if (i <= startI && j >= startJ) topRight.Add(currIndex);
-                    if (i >= startI && j >= startJ) bottomRight.Add(currIndex);
-                    if (i >= startI && j <= startJ) bottomLeft.Add(currIndex);
+                    if (i <= startI && j <= startJ ||
+                        i >= startI && j >= startJ) 
+                            leftDiag.Add(currIndex);
+
+                    if (i <= startI && j >= startJ ||
+                        i >= startI && j <= startJ) 
+                            rightDiag.Add(currIndex);
                 }
             }
         }
 
-        var leftDiag = topLeft.Concat(bottomRight).Distinct();
-        var rightDiag = topRight.Concat(bottomLeft).Distinct();
-
-        return CheckAndCache2(leftDiag.ToList(), rightDiag.ToList()) ? 1 : 0;
+        return CheckX_MAS(leftDiag, rightDiag);
     }
 
     public override long GetSolution1()
@@ -194,22 +150,26 @@ internal class Day4_2024 : Day2024
         {
             for(int j = 0; j < Data[i].Length; ++j)
             {
-                var x = CheckXMAS(i, j);
+                // Only checking X as the origin eliminates overlap
+                if (Data[i][j] == 'X')
+                    count += CheckXMAS(i, j);
             }
         }
-        return Found.Count;
+        return count;
     }
 
     public override long GetSolution2()
     {
-        CheckX_MAS(1, 2);
+        int count = 0;
         for (int i = 0; i < Data.Count; ++i)
         {
             for (int j = 0; j < Data[i].Length; ++j)
             {
-                var x = CheckX_MAS(i, j);
+                // Only checking A as the origin eliminates overlap
+                if (Data[i][j] == 'A')
+                    count += CheckX_MAS(i, j) ? 1 : 0;
             }
         }
-        return Found2.Count;
+        return count;
     }
 }
