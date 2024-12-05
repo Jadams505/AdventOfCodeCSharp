@@ -22,7 +22,6 @@ internal class Day5_2024 : Day2024
         {
 
             var listMatch = listRegex.Match(line);
-            var ruleMatch = ruleRegex.Match(line);
 
             if (listMatch.Success)
             {
@@ -32,8 +31,10 @@ internal class Day5_2024 : Day2024
                     list.AddRange(g.Captures.Select(cap => int.Parse(cap.Value)));
                 }
                 Lists.Add(list);
+                continue;
             }
 
+            var ruleMatch = ruleRegex.Match(line);
             if (ruleMatch.Success)
             {
                 var num1 = int.Parse(ruleMatch.Groups[1].Value);
@@ -47,7 +48,7 @@ internal class Day5_2024 : Day2024
                 {
                     Rules.Add(num1, [num2]);
                 }
-
+                continue;
             }
         }
     }
@@ -69,13 +70,14 @@ internal class Day5_2024 : Day2024
     private bool CheckRules(List<int> list)
     {
         var lookup = list.Index().ToDictionary(item => item.Item, item => item.Index);
-        foreach (var num in list)
+        foreach (var (ourIndex, num) in list.Index())
         {
+            // if there is no rule its valid
             if (!Rules.TryGetValue(num, out var rule)) return true;
 
-            var ourIndex = lookup[num];
             foreach (var after in rule)
             {
+                // if both numbers are not in the list its valid
                 if (!lookup.TryGetValue(after, out var afterIndex)) continue;
 
                 if (ourIndex > afterIndex) return false;
