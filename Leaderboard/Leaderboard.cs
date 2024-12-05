@@ -8,7 +8,7 @@ internal class Leaderboard
 {
     public const string EmptyTableEntry = "-";
     public LeaderboardJson Stats { get; private set; } = new();
-    public string LeaderboardFile => $"{LeaderboardId}.json";
+    public string LeaderboardFile => $"{LeaderboardId}_{Year}.json";
     public DateTime LastUpdateTimeUtc { get; private set; }
     public string LeaderboardId { get; set; }
     public int Year { get; set; }
@@ -62,6 +62,7 @@ internal class Leaderboard
     public int CurrDay()
     {
         var now = DateTime.Now;
+        if (Year < now.Year) return LeaderboardTable.MaxDay;
         var first = new DateTime(Stats.Event, 12, 1);
         var last = new DateTime(Stats.Event, 12, 26);
         var delta = now >= last 

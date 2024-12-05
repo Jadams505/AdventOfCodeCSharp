@@ -51,9 +51,10 @@ internal class LeaderboardTable
     {
         if (time is null)
             return EmptyTableEntry;
-        
+
         if (time.Value.TotalHours > 24)
-            return Beyond24hEntry;
+            //return Beyond24hEntry;
+            return time.Value.ToString();
 
         return time.Value.ToString();
     }
