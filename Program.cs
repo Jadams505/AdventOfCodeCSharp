@@ -1,6 +1,4 @@
-﻿using AdventOfCode.Days;
-using AdventOfCode.Days._2024;
-using System.Reflection;
+﻿using AdventOfCode.Days._2024;
 
 namespace AdventOfCode;
 
@@ -8,7 +6,8 @@ internal class Program
 {
 	static void Main(string[] args)
 	{
-		new Day5_2024();
+		new Day6_2024();
+		//new Day5_2024();
 		//new Day4_2024();
 		//new Day3_2024();
 		//new Day2_2024();
