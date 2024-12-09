@@ -1,8 +1,5 @@
-﻿using System;
-using System.Drawing;
-using System.Text;
+﻿using AdventOfCode.Util;
 using System.Text.RegularExpressions;
-using Location = (int Row, int Col);
 
 namespace AdventOfCode.Days._2024;
 
@@ -28,7 +25,7 @@ internal class Day8_2024 : Day2024
             for (int j = 0; j < Map[i].Length; ++j)
             {
                 var c = Map[i][j];
-                if (c == '.' || c == '#') continue;
+                if (c == '.') continue;
                 if (FrequencyLookup.TryGetValue(c, out var list))
                 {
                     list.Add((i, j));
@@ -78,44 +75,61 @@ internal class Day8_2024 : Day2024
 
     public override long GetSolution1()
     {
-        //long sum = 0;
+        Antinodes.Clear();
+        foreach (var frequencies in FrequencyLookup)
+        {
+            for (int i = 0; i < frequencies.Value.Count; ++i)
+            {
+                for (int j = i + 1; j < frequencies.Value.Count; ++j)
+                {
+                    var a = frequencies.Value[i];
+                    var b = frequencies.Value[j];
 
-        //foreach(var frequencies in FrequencyLookup)
-        //{
-        //    for (int i = 0; i < frequencies.Value.Count; ++i)
-        //    {
-        //        for (int j = i + 1; j < frequencies.Value.Count; ++j)
-        //        {
-        //            var a = frequencies.Value[i];
-        //            var b = frequencies.Value[j];
-
-        //            AddAntinode(a, b);
-        //        }
-        //    }
-        //}
+                    AddAntinode(a, b);
+                }
+            }
+        }
 
         return Antinodes.Count;
+    }
+
+    public bool AddAntinode2(char val, Location pos)
+    {
+        if (!ValidPoint(pos)) return false;
+
+        if (Antinodes.TryGetValue(pos, out var set))
+        {
+            set.Add(val);
+        }
+        else
+        {
+            Antinodes[pos] = [val];
+        }
+
+        return true;
     }
 
     public void AddAntinode2(Location a, Location b)
     {
         var delta = a.Delta(b);
-        AddAntinode(Get(a), a);
-        AddAntinode(Get(b), b);
-        var left = a.Minus(delta);
-        var right = b.Plus(delta);
-        for (int i = 0; i < 100; ++i)
-        {
-            AddAntinode(Get(a), left);
-            AddAntinode(Get(a), right);
+        var c = Get(a);
 
+        var left = a;
+        while(AddAntinode2(c, left))
+        {
             left = left.Minus(delta);
+        }
+
+        var right = b;
+        while (AddAntinode2(c, right))
+        {
             right = right.Plus(delta);
         }
     }
 
     public override long GetSolution2()
     {
+        Antinodes.Clear();
         foreach (var frequencies in FrequencyLookup)
         {
             for (int i = 0; i < frequencies.Value.Count; ++i)
@@ -132,26 +146,4 @@ internal class Day8_2024 : Day2024
 
         return Antinodes.Count;
     }
-}
-
-public static class Extensions2D
-{
-    public static Location Up(this Location pos, int n = 1) => (pos.Row - n, pos.Col);
-    public static Location Down(this Location pos, int n = 1) => (pos.Row + n, pos.Col);
-    public static Location Left(this Location pos, int n = 1) => (pos.Row, pos.Col - n);
-    public static Location Right(this Location pos, int n = 1) => (pos.Row, pos.Col + n);
-
-    public static Location DeltaAbs(this Location pos, Location to) => 
-        (Math.Abs(pos.Row - to.Row), Math.Abs(pos.Col - to.Col));
-
-    public static Location Delta(this Location pos, Location to) =>
-        (to.Row - pos.Row, to.Col - pos.Col);
-
-    public static Location Plus(this Location pos, Location other) =>
-        (pos.Row + other.Row, pos.Col + other.Col);
-
-    public static Location Minus(this Location pos, Location other) =>
-        (pos.Row - other.Row, pos.Col - other.Col);
-
-
 }
