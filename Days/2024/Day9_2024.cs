@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Util;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,12 +18,17 @@ internal class Day9_2024 : Day2024
 
         foreach (var line in contents)
         {
-            for (int i = 0; i < line.Length - 1; i += 2)
+            for (int i = 0; i < line.Length; i += 2)
             {
-                var size = line[i];
-                var gap = line[i + 1];
-                Data.Add(new Disk(size, i));
-                Data.Add(new Disk(size, -1));
+                
+                var size = (int)char.GetNumericValue(line[i]);
+                Data.Add(new Disk(size, i / 2));
+                if (i + 1 < line.Length)
+                {
+                    var gap = (int)char.GetNumericValue(line[i + 1]);
+
+                    Data.Add(new Disk(gap, -1));
+                }
             }
         }
     }
@@ -48,6 +54,7 @@ internal class Day9_2024 : Day2024
 
     public override long GetSolution1()
     {
+        return 0;
         var head = 0;
         var tail = Data.Count - 1;
         while(head < tail)
@@ -66,21 +73,34 @@ internal class Day9_2024 : Day2024
                 continue;
             }
 
-            first.FillGap(last);
-            if (first.Empty)
+            var fill = first.FillGap(last);
+            if (fill > 0)
             {
-                Data.RemoveAt(head);
-                tail--;
+                head++;
+                Data.Insert(head, new Disk(fill, -1));
             }
-
-            if (!last.Empty && last.Id != -1)
+            if (last.Empty)
             {
                 Data.RemoveAt(tail);
-                Data.Insert(head, last);
+                tail--;
+            }
+            else if (first.Id == last.Id)
+            {
+                head++;
             }
         }
+        long total = 0;
+        int index = 0;
+        foreach (var disk in Data)
+        {
+            if (disk.Id == -1) break;
+
+            var sum = disk.CheckSum(index);
+            index += disk.Size;
+            total += sum;
+        }
         
-        return 0;
+        return total;
     }
 
     public long CheckSum(char[] memory)
@@ -97,7 +117,90 @@ internal class Day9_2024 : Day2024
    
     public override long GetSolution2()
     {
-        return 0;
+        var head = 0;
+        var tail = Data.Count - 1;
+        while (head < tail)
+        {
+            var first = Data[head];
+            var last = Data[tail];
+            if (first.Id != -1)
+            {
+                head++;
+                continue;
+            }
+
+            if (last.Id == -1)
+            {
+                tail--;
+                continue;
+            }
+
+            var newTail = tail;
+            while(head < newTail)
+            {
+                var newLast = Data[newTail];
+                if (newLast.Id == -1)
+                {
+                    newTail--;
+                    continue;
+                }
+                var canFill = first.CanFillGap(newLast);
+                if (canFill)
+                {
+                    var fill = first.SwapGap(newLast);
+                    newLast.Id = -1;
+                    if (fill > 0)
+                    {
+                        head++;
+                        Data.Insert(head, new Disk(fill, -1));
+                    }
+                    break;
+                }
+                else
+                {
+                    newTail--;
+                }
+            }
+
+            
+
+            static (int Head, int Tail) FillGap(List<Disk> Data, int head, int tail)
+            {
+                var first = Data[head];
+                var last = Data[tail];
+                var fill = first.FillGap(last);
+                if (fill > 0)
+                {
+                    head++;
+                    Data.Insert(head, new Disk(fill, -1));
+                }
+                if (last.Empty)
+                {
+                    Data.RemoveAt(tail);
+                    tail--;
+                }
+                else if (first.Id == last.Id)
+                {
+                    head++;
+                }
+
+                return (head, tail);
+            }
+
+            
+        }
+        long total = 0;
+        int index = 0;
+        foreach (var disk in Data)
+        {
+            if (disk.Id == -1) break;
+
+            var sum = disk.CheckSum(index);
+            index += disk.Size;
+            total += sum;
+        }
+
+        return total;
     }
 }
 public class Disk : Space
@@ -112,6 +215,16 @@ public class Disk : Space
 
         Size = size;
         Id = id;
+    }
+
+    public long CheckSum(int startIndex)
+    {
+        long total = 0;
+        for (int i = startIndex; i < startIndex + Size; ++i)
+        {
+            total += i;
+        }
+        return Id * total;
     }
 
     public override string ToString()
@@ -158,15 +271,39 @@ public static class Day9Extensions
         gap.Size += other.Size;
     }
 
-    public static bool FillGap(this Disk gap, Disk disk)
+    public static int FillGap(this Disk gap, Disk disk)
     {
         if (gap.Id == -1)
         {
             var mergeSpace = gap.Size - disk.Size;
             gap.Size = Math.Clamp(disk.Size, 0, gap.Size);
-            disk.Size = Math.Abs(mergeSpace);
+            disk.Size = mergeSpace >= 0 ? 0 : -mergeSpace;
             gap.Id = disk.Id;
-            return gap.Size == 0;
+            return mergeSpace;
+        }
+
+        return gap.Size;
+    }
+
+    public static int SwapGap(this Disk gap, Disk disk)
+    {
+        if (gap.Id == -1)
+        {
+            var mergeSpace = gap.Size - disk.Size;
+            gap.Size = Math.Clamp(disk.Size, 0, gap.Size);
+            gap.Id = disk.Id;
+            disk.Id = -1;
+            return mergeSpace;
+        }
+
+        return gap.Size;
+    }
+
+    public static bool CanFillGap(this Disk gap, Disk disk)
+    {
+        if (gap.Id == -1)
+        {
+            return gap.Size >= disk.Size;
         }
 
         return false;
