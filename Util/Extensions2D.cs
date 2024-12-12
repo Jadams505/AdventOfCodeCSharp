@@ -29,13 +29,13 @@ public static class Extensions2D
 
     public static Direction? DirectionTo(this Location pos, Location other) => other.Minus(pos) switch
     {
-        var (Row, Col) when Row > 0 && Col == 0 => Direction.East,
+        var (Row, Col) when Row > 0 && Col == 0 => Direction.South,
         var (Row, Col) when Row > 0 && Col > 0 => Direction.NorthEast,
-        var (Row, Col) when Row == 0 && Col > 0 => Direction.North,
+        var (Row, Col) when Row == 0 && Col > 0 => Direction.East,
         var (Row, Col) when Row < 0 && Col > 0 => Direction.NorthWest,
-        var (Row, Col) when Row < 0 && Col == 0 => Direction.West,
+        var (Row, Col) when Row < 0 && Col == 0 => Direction.North,
         var (Row, Col) when Row < 0 && Col < 0 => Direction.SouthWest,
-        var (Row, Col) when Row == 0 && Col < 0 => Direction.South,
+        var (Row, Col) when Row == 0 && Col < 0 => Direction.West,
         _ => null
     };
 
