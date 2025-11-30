@@ -43,7 +43,7 @@ internal class Day9_2024 : Day2024
                 var builder = new StringBuilder();
                 foreach (var disk in Data)
                 {
-                    builder.Append(disk.ToString());
+                    builder.Append(disk.ToString().Replace("-1", "-"));
                 }
                 _memoryCache = builder.ToString();
             }
@@ -114,93 +114,92 @@ internal class Day9_2024 : Day2024
         return sum;
     }
 
-   
+    public int GetBlockForward(Span<char> sequence, int start)
+    {
+        var curr = sequence[start];
+        var count = 1;
+        for (int i = start + 1; i < sequence.Length; ++i)
+        {
+            if (sequence[i] != curr)
+                return count;
+            count++;
+            curr = sequence[i];
+        }
+        return count;
+    }
+
+    public int GetBlockBackward(Span<char> sequence, int start)
+    {
+        var curr = sequence[start];
+        var count = 1;
+        for (int i = start - 1; i >= 0; --i)
+        {
+            if (sequence[i] != curr)
+                return count;
+            count++;
+            curr = sequence[i];
+        }
+        return count;
+    }
+
+    public (int start, int end, char c) FindFirstBlockBackwardsThatFits(Span<char> sequence, int start, int end, int size)
+    {
+        for (int i = end; i > start; --i)
+        {
+            int block = GetBlockBackward(sequence, i);
+            var c = sequence[i];
+            if (block <= size && c is not '-')
+            {
+                return (i - block + 1, i, c);
+            }
+            i -= block + 1;
+        }
+        return (start, end, '-');
+    }
+
     public override long GetSolution2()
     {
+        var cache = Memory.ToCharArray();
         var head = 0;
-        var tail = Data.Count - 1;
-        while (head < tail)
+        var tail = cache.Length - 1;
+
+        while(head < tail)
         {
-            var first = Data[head];
-            var last = Data[tail];
-            if (first.Id != -1)
+            var first = cache[head];
+            var last = cache[tail];
+            if (first is not '-')
             {
-                head++;
+                head += GetBlockForward(cache, head);
                 continue;
             }
 
-            if (last.Id == -1)
+            if (last is '-')
             {
-                tail--;
+                tail -= GetBlockBackward(cache, tail);
                 continue;
             }
 
-            var newTail = tail;
-            while(head < newTail)
+            var headBlock = GetBlockForward(cache, head);
+            var block = FindFirstBlockBackwardsThatFits(cache, head, tail, headBlock);
+
+            if (block.c is '-')
             {
-                var newLast = Data[newTail];
-                if (newLast.Id == -1)
-                {
-                    newTail--;
-                    continue;
-                }
-                var canFill = first.CanFillGap(newLast);
-                if (canFill)
-                {
-                    var fill = first.SwapGap(newLast);
-                    newLast.Id = -1;
-                    if (fill > 0)
-                    {
-                        head++;
-                        Data.Insert(head, new Disk(fill, -1));
-                    }
-                    break;
-                }
-                else
-                {
-                    newTail--;
-                }
+                head += headBlock;
+                continue;
             }
 
-            
-
-            static (int Head, int Tail) FillGap(List<Disk> Data, int head, int tail)
+            for (int i = block.start; i <= block.end; ++i)
             {
-                var first = Data[head];
-                var last = Data[tail];
-                var fill = first.FillGap(last);
-                if (fill > 0)
-                {
-                    head++;
-                    Data.Insert(head, new Disk(fill, -1));
-                }
-                if (last.Empty)
-                {
-                    Data.RemoveAt(tail);
-                    tail--;
-                }
-                else if (first.Id == last.Id)
-                {
-                    head++;
-                }
-
-                return (head, tail);
+                cache[i] = '-';
             }
-
-            
-        }
-        long total = 0;
-        int index = 0;
-        foreach (var disk in Data)
-        {
-            if (disk.Id == -1) break;
-
-            var sum = disk.CheckSum(index);
-            index += disk.Size;
-            total += sum;
+            for (int i = head; i <= head + block.end - block.start; ++i)
+            {
+                cache[i] = block.c;
+            }
+            head += block.end - block.start + 1;
         }
 
-        return total;
+        return 0;
     }
 }
 public class Disk : Space
