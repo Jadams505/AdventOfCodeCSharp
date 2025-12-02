@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <!--<CETCompat>false</CETCompat>-->
-	  <StartupObject>AdventOfCode.Program</StartupObject>
+	  <StartupObject>AdventOfCode.Days._2025.Runner2025</StartupObject>
 	  <!-- 
 	  <StartupObject>AdventOfCode.Leaderboard.Runner</StartupObject>
 	  -->
