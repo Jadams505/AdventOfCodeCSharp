@@ -50,10 +50,9 @@ internal class Day2_2025 : Day2025
                 if (CheckRepeat(stringNum, repeat))
                 {
                     yield return i;
-                    goto End; // I hate this
+                    break;
                 }
             }
-            End:;
 		}
 	}
 
