@@ -12,6 +12,7 @@ internal class Runner2025
 	static void Main(string[] args)
 	{
 		//Console.WriteLine("2025");
-		new Day1_2025();
+		//new Day1_2025();
+		new Day2_2025();
 	}
 }
