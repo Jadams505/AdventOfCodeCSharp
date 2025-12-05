@@ -4,7 +4,7 @@ internal class Runner
 {
     public static void Main(string[] args)
     {
-        int year = 2024;
+        int year = 2025;
         Leaderboard jet = new(Secret.JetLeaderboard, year);
         Leaderboard dad = new(Secret.DadLeaderboard, year);
         Leaderboard combined = jet.CombineMembers(dad);

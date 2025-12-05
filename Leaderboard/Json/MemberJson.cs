@@ -15,7 +15,7 @@ internal class MemberJson : IElementJson<MemberJson>
         MemberJson member = new()
         {
             LastStarTimeStamp = ulong.Parse(json.GetProperty("last_star_ts").ToString()),
-            GlobalScore = int.Parse(json.GetProperty("global_score").ToString()),
+            // remove in 2025 GlobalScore = int.Parse(json.GetProperty("global_score").ToString()),
             LocalScore = int.Parse(json.GetProperty("local_score").ToString()),
             Name = json.GetProperty("name").ToString(),
         };
