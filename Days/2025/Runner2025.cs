@@ -16,6 +16,7 @@ internal class Runner2025
 		//new Day2_2025();
 		//new Day3_2025();
 		//new Day4_2025();
-		new Day5_2025();
+		//new Day5_2025();
+		new Day6_2025();
 	}
 }
